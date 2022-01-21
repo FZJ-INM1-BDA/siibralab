@@ -3,43 +3,38 @@ classdef Region
         name
         id
         parcellation
-        space_url
+        spaces_to_url
     end
     methods
         function region = Region(name, id, parcellation, dataset_specs)
             region.name = name;
             region.id = id;
             region.parcellation = parcellation;
-
+            
             % parse dataset_specs for this region
+            space_ids = string.empty;
+            space_urls = string.empty;
             if ~isempty(dataset_specs)
                 for i = 1:numel(dataset_specs)
-                    if iscell(dataset_specs)
-                        space_id = dataset_specs{i, 1}.space_id;
-                        url = dataset_specs{i, 1}.url;
-                    else
-                        space_id = dataset_specs(i).space_id;
-                        url = dataset_specs(i).url;
-                    end
-                    % currently "MNI152 2009c nonl asym" is supported only 
-                    if space_id == "minds/core/referencespace/v1.0.0/dafcffc5-4826-4bf1-8ff6-46b8a31ff8e2"
-                        region.space_url = url;
-                        break;
+                    if iscell(dataset_specs) && isfield(dataset_specs{i, 1}, "space_id")
+                        space_ids(length(space_ids) +1) = dataset_specs{i, 1}.space_id;
+                        space_urls(length(space_urls) +1) = dataset_specs{i, 1}.url;
+                    elseif isfield(dataset_specs(i), "space_id")
+                        space_ids(length(space_ids) +1) = dataset_specs(i).space_id;
+                        space_urls(length(space_urls) +1) = dataset_specs(i).url;
                     end
                 end
-            else
-                % if no region map available
-                region.space_url = "";
             end
+            region.spaces_to_url = containers.Map(space_ids, space_urls);
         end
         function children = getChildrenNames(obj)
             children = obj.parcellation.getChildrenNames(obj.name);
         end
         function pmap = probabilityMap(obj)
-            if obj.space_url == ""
+            if obj.spaces_to_url == ""
                 error("This region has no region map!");
             end
-            nifti_data = webread(obj.space_url);
+            nifti_data = webread(obj.spaces_to_url);
             file_handle = fopen("tmp_nifti.nii.gz", "w");
             fwrite(file_handle, nifti_data);
             fclose(file_handle);

@@ -3,27 +3,29 @@ classdef Parcellation
         Id
         Name
         AtlasId
+        Modality
+        Description
         Graph
+        Spaces
     end
     methods
-        function parcellation = Parcellation(id, name, atlasId)
-            parcellation.Id = strcat(id.kg.kgSchema, '/', id.kg.kgId);
-            parcellation.Name = name;
+        function parcellation = Parcellation(parcellation_json, atlasId)
+            parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
+            parcellation.Name = parcellation_json.name;
             parcellation.AtlasId = atlasId;
+            parcellation.Modality = parcellation_json.modality;
+            %parcellation.Description = parcellation_json.infos.description;
+            
             % call api to get parcellation tree
-            regions = webread(Siibra.apiEndpoint + "atlases/" + parcellation.AtlasId + "/parcellations/" + parcellation.Id + "/regions");
-            root.name = parcellation.Name;
-            root.children = regions;
-            [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);
-            % append root node
-            nodes = target;
-            nodes(length(nodes) + 1) = root.name;
-            region(length(region) + 1) = Region(root.name, "root", parcellation, []);
-            % make nodes unique
-            [unique_nodes, unique_indices, ~] = unique(nodes);
-            nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
+            regions = webread(parcellation_json.links.regions.href);
+            
             % store graph
-            parcellation.Graph = digraph(source, target, zeros(length(target), 1),  nodeTable);
+            parcellation.Graph = Parcellation.createParcellationTree(parcellation, regions);
+
+            % retrieve available spaces
+            %spaces = webread(parcellation_json.links.spaces.href);
+
+
         end
         function region = getRegion(obj, region_name_query)
             nodeId = obj.Graph.findnode(region_name_query);
@@ -36,6 +38,20 @@ classdef Parcellation
         end
     end
     methods (Static)
+        function tree = createParcellationTree(parcellation, regions)
+            root.name = parcellation.Name;
+            root.children = regions;
+            [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);
+            % append root node
+            nodes = target;
+            nodes(length(nodes) + 1) = root.name;
+            region(length(region) + 1) = Region(root.name, "root", parcellation, []);
+            % make nodes unique
+            [unique_nodes, unique_indices, ~] = unique(nodes);
+            nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
+            tree = digraph(source, target, zeros(length(target), 1),  nodeTable);
+        end
+
         function [source, target, regions] = traverseTree(parcellation, root, source, target, regions)
             % Parses the parcellation tree.
             % Recursively calls itself to parse the children of the current

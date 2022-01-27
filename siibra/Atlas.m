@@ -1,27 +1,26 @@
 classdef Atlas
     properties
-        id
-        name
-        parcellations
-        spaces
+        Id
+        Name
+        Parcellations
+        Spaces
     end
     methods
         function atlas = Atlas(atlas_json)
-            atlas.id = atlas_json.id;
-            atlas.name = atlas_json.name;
-            atlas.parcellations = Parcellation.empty;
+            atlas.Id = atlas_json.id;
+            atlas.Name = atlas_json.name;
+            atlas.Parcellations = Parcellation.empty;
             parcellations_json = webread(atlas_json.links.parcellations.href);
             for parcellation_row = 1:numel(parcellations_json)
-                atlas.parcellations(length(atlas.parcellations) + 1) = Parcellation(parcellations_json(parcellation_row), atlas.id);
+                atlas.Parcellations(length(atlas.Parcellations) + 1) = Parcellation(parcellations_json(parcellation_row), atlas.Id);
             end
-
+            % spaces_json = webread(atlas_json.links.spaces.href);
 
         end
         function parcellation = getParcellation(obj, parcellation_name_query)
-            parcellations = webread(Siibra.apiEndpoint + "atlases/" + obj.id + "/parcellations");
-            for percellation_row = 1:numel(parcellations)
-                if parcellation_name_query == parcellations(percellation_row).name
-                    parcellation = Parcellation(parcellations(percellation_row).id, parcellations(percellation_row).name, obj.id);
+            for percellation_row = 1:numel(obj.Parcellations)
+                if parcellation_name_query == obj.Parcellations(percellation_row).name
+                    parcellation = obj.Parcellations(percellation_row);
                     break
                 end
             end

@@ -1,40 +1,54 @@
 classdef Region
     properties
-        name
-        id
-        parcellation
-        spaces_to_url
+        Name
+        Id
+        Parcellation
+        Spaces
     end
     methods
         function region = Region(name, id, parcellation, dataset_specs)
-            region.name = name;
-            region.id = id;
-            region.parcellation = parcellation;
+            region.Name = name;
+            region.Id = id;
+            region.Parcellation = parcellation;
             
             % parse dataset_specs for this region
+            % create a table with a row for each space
+            Spaces = table;
             space_ids = string.empty;
+            space_name = string.empty;
             space_urls = string.empty;
+            space_volume_types = string.empty;
+            space_map_types = string.empty;
+            
             if ~isempty(dataset_specs)
                 for i = 1:numel(dataset_specs)
                     if iscell(dataset_specs) && isfield(dataset_specs{i, 1}, "space_id")
-                        space_ids(length(space_ids) +1) = dataset_specs{i, 1}.space_id;
-                        space_urls(length(space_urls) +1) = dataset_specs{i, 1}.url;
+                        space_ids(end +1) = dataset_specs{i, 1}.space_id;
+                        space_urls(end +1) = dataset_specs{i, 1}.url;
+                        space_name(end +1) = dataset_specs{i, 1}.name;
+                        space_volume_types(end +1) = dataset_specs{i, 1}.volume_type;
+                        space_map_types(end +1) = dataset_specs{i, 1}.map_type; 
                     elseif isfield(dataset_specs(i), "space_id")
-                        space_ids(length(space_ids) +1) = dataset_specs(i).space_id;
-                        space_urls(length(space_urls) +1) = dataset_specs(i).url;
+                        space_ids(end +1) = dataset_specs(i).space_id;
+                        space_urls(end +1) = dataset_specs(i).url;
+                        space_name(end +1) = dataset_specs(i).name;
+                        space_volume_types(end +1) = dataset_specs(i).volume_type;
+                        space_map_types(end +1) = dataset_specs(i).map_type; 
                     end
                 end
             end
-            region.spaces_to_url = containers.Map(space_ids, space_urls);
+            
+            region.Spaces = table(space_ids.', space_name.', space_urls.', ...
+                space_volume_types.', space_map_types.', 'VariableNames',{'Id','Name','URL','VolumeType', 'MapType'});
         end
         function children = getChildrenNames(obj)
-            children = obj.parcellation.getChildrenNames(obj.name);
+            children = obj.Parcellation.getChildrenNames(obj.Name);
         end
         function pmap = probabilityMap(obj)
-            if obj.spaces_to_url == ""
+            if obj.Spaces == ""
                 error("This region has no region map!");
             end
-            nifti_data = webread(obj.spaces_to_url);
+            nifti_data = webread(obj.Spaces);
             file_handle = fopen("tmp_nifti.nii.gz", "w");
             fwrite(file_handle, nifti_data);
             fclose(file_handle);

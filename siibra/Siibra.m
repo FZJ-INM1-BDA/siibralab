@@ -9,11 +9,13 @@ classdef Siibra
     end
     methods
         function siibra = Siibra()
-            siibra.atlases = Atlas.empty;
             atlases_json = webread(Siibra.apiEndpoint + "atlases");
+            atlases = Atlas.empty;
             for atlas_row = 1:numel(atlases_json)
-                siibra.atlases(length(siibra.atlases) + 1) = Atlas(atlases_json(atlas_row));
+                atlas = Atlas(atlases_json(atlas_row));
+                atlases(end + 1) = atlas;
             end
+            siibra.atlases = table({atlases.Name}.', atlases.', 'VariableNames', {'Name', 'Atlas'});
 
         end
     end

@@ -1,4 +1,4 @@
-classdef Atlas
+classdef Atlas < handle
     properties
         Id
         Name
@@ -10,15 +10,6 @@ classdef Atlas
             atlas.Id = atlas_json.id;
             atlas.Name = atlas_json.name;
 
-            % Parcellations
-            parcellations = Parcellation.empty;
-            parcellations_json = webread(atlas_json.links.parcellations.href);
-            for parcellation_row = 1:numel(parcellations_json)
-                parcellation = Parcellation(parcellations_json(parcellation_row), atlas.Id);
-                parcellations(end +1) = parcellation;
-            end
-            atlas.Parcellations = table(string({parcellations.Name}).', parcellations.', 'VariableNames', {'Name', 'Parcellation'});
-            
             % Spaces
             spaces = Space.empty;
             spaces_json = webread(atlas_json.links.spaces.href);
@@ -27,6 +18,17 @@ classdef Atlas
                 spaces(end +1) = space;
             end
             atlas.Spaces = table(string({spaces.Name}).', spaces.', 'VariableNames', {'Name', 'Space'});
+
+            % Parcellations
+            parcellations = Parcellation.empty;
+            parcellations_json = webread(atlas_json.links.parcellations.href);
+            for parcellation_row = 1:numel(parcellations_json)
+                parcellation = Parcellation(parcellations_json(parcellation_row), atlas);
+                parcellations(end +1) = parcellation;
+            end
+            atlas.Parcellations = table(string({parcellations.Name}).', parcellations.', 'VariableNames', {'Name', 'Parcellation'});
+            
+            
         end
         function parcellation = getParcellation(obj, parcellation_name_query)
             for percellation_row = 1:numel(obj.Parcellations)

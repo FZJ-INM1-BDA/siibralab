@@ -1,29 +1,42 @@
-classdef Parcellation
+classdef Parcellation < handle
     properties
         Id
         Name
-        AtlasId
+        Atlas
         Modality
         Description
         Graph
         Spaces
     end
     methods
-        function parcellation = Parcellation(parcellation_json, atlasId)
+        function parcellation = Parcellation(parcellation_json, atlas)
             parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
             parcellation.Name = parcellation_json.name;
-            parcellation.AtlasId = atlasId;
+            parcellation.Atlas = atlas;
             parcellation.Modality = parcellation_json.modality;
-            %parcellation.Description = parcellation_json.infos.description;
+            if ~ isempty(parcellation_json.infos)
+                parcellation.Description = parcellation_json.infos(1).description;
+            end
             
             % call api to get parcellation tree
             regions = webread(parcellation_json.links.regions.href);
             
             % store graph
             parcellation.Graph = Parcellation.createParcellationTree(parcellation, regions);
-
-            % retrieve available spaces
-            %spaces = webread(parcellation_json.links.spaces.href);
+            
+            spaces_subset = Space.empty;
+            % retrieve available spaces from atlas
+            %parcellation.NamesOfAvailableSpaces = string({parcellation_json.availableSpaces.name});
+            for available_space_index = 1:numel(parcellation_json.availableSpaces)
+                % TODO match with spaces of atlas
+                % store handle to space object
+                for atlas_space_index = 1:numel(atlas.Spaces.Space)
+                    if isequal(atlas.Spaces.Space(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
+                        spaces_subset(end +1) = atlas.Spaces.Space(atlas_space_index);
+                    end
+                end
+            end
+            parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
 
 
         end

@@ -1,4 +1,4 @@
-classdef Region
+classdef Region < handle
     properties
         Name
         Id

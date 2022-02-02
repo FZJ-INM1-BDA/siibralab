@@ -1,11 +1,11 @@
-classdef Siibra
+classdef Siibra < handle
     properties(Constant)
         % Swagger documentation
         % https://siibra-api-latest.apps-dev.hbp.eu/v1_0/docs
         apiEndpoint = "https://siibra-api-latest.apps-dev.hbp.eu/v1_0/"
     end
     properties
-        atlases
+        Atlases
     end
     methods
         function siibra = Siibra()
@@ -15,7 +15,7 @@ classdef Siibra
                 atlas = Atlas(atlases_json(atlas_row));
                 atlases(end + 1) = atlas;
             end
-            siibra.atlases = table({atlases.Name}.', atlases.', 'VariableNames', {'Name', 'Atlas'});
+            siibra.Atlases = table({atlases.Name}.', atlases.', 'VariableNames', {'Name', 'Atlas'});
 
         end
     end

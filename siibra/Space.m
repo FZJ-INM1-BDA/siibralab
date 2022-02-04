@@ -1,6 +1,4 @@
 classdef Space < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         ID
@@ -20,12 +18,7 @@ classdef Space < handle
             space.Format = space_json.type;
             space.VolumeType = space_json.src_volume_type;
             space.TemplateURL = space_json.links.templates.href;
-        end
-
-        function template = getTemplate(obj)
-            template = webread(obj.TemplateURL);
-        end
-        
+        end     
     end
 end
 

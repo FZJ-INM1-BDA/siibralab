@@ -8,6 +8,7 @@ classdef Parcellation < handle
         Graph
         Spaces
     end
+
     methods
         function parcellation = Parcellation(parcellation_json, atlas)
             parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
@@ -17,6 +18,18 @@ classdef Parcellation < handle
             if ~ isempty(parcellation_json.infos)
                 parcellation.Description = parcellation_json.infos(1).description;
             end
+
+            % link spaces from atlas
+            parcellation.Spaces = Space.empty;
+            % retrieve available spaces from atlas
+            for available_space_index = 1:numel(parcellation_json.availableSpaces)
+                % store handle to space object
+                for atlas_space_index = 1:numel(atlas.Spaces.Space)
+                    if isequal(atlas.Spaces.Space(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
+                        parcellation.Spaces(end +1) = atlas.Spaces.Space(atlas_space_index);
+                    end
+                end
+            end
             
             % call api to get parcellation tree
             regions = webread(parcellation_json.links.regions.href);
@@ -24,21 +37,12 @@ classdef Parcellation < handle
             % store graph
             parcellation.Graph = Parcellation.createParcellationTree(parcellation, regions);
             
-            spaces_subset = Space.empty;
-            % retrieve available spaces from atlas
-            %parcellation.NamesOfAvailableSpaces = string({parcellation_json.availableSpaces.name});
-            for available_space_index = 1:numel(parcellation_json.availableSpaces)
-                % TODO match with spaces of atlas
-                % store handle to space object
-                for atlas_space_index = 1:numel(atlas.Spaces.Space)
-                    if isequal(atlas.Spaces.Space(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
-                        spaces_subset(end +1) = atlas.Spaces.Space(atlas_space_index);
-                    end
-                end
-            end
-            parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
-
-
+            
+            %parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
+        end
+        %getters
+        function space_table = spaceTable(obj)  
+            space_table = table(string({obj.Spaces.Name}).', obj.Spaces.', 'VariableNames', {'Name', 'Space'});
         end
         function region = getRegion(obj, region_name_query)
             nodeId = obj.Graph.findnode(region_name_query);
@@ -48,6 +52,14 @@ classdef Parcellation < handle
             nodeId = obj.Graph.findnode(region_name);
             childrenIds = obj.Graph.successors(nodeId);
             children = obj.Graph.Nodes.Name(childrenIds);
+        end
+        function parent = getParentName(obj, region_name)
+            nodeId = obj.Graph.findnode(region_name);
+            parents = obj.Graph.predecessors(nodeId);
+            assert(length(parents) == 1, "Expect just one parent in a tree structure");
+            parentID = parents(1);
+            parent_cell = obj.Graph.Nodes.Name(parentID);
+            parent = parent_cell{1};
         end
     end
     methods (Static)

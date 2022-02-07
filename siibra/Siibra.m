@@ -18,5 +18,13 @@ classdef Siibra < handle
             siibra.Atlases = table({atlases.Name}.', atlases.', 'VariableNames', {'Name', 'Atlas'});
 
         end
+        function parcellations = Parcellations(obj)
+            parcellations = table;
+            for i = 1:numel(obj.Atlases.Atlas)
+                atlas = obj.Atlases.Atlas(i);
+                parcellations = [parcellations; atlas.Parcellations];
+            end
+            %parcellations = unique(parcellations);
+        end
     end
 end

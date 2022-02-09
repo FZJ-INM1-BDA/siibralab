@@ -1,1 +1,4 @@
 .DS_Store
+*.asv
+tmp_nifti.nii.gz
+screen-shots/

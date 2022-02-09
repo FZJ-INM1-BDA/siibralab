@@ -11,7 +11,7 @@ classdef Parcellation
             parcellation.Name = name;
             parcellation.AtlasId = atlasId;
             % call api to get parcellation tree
-            regions = api_call(Siibra.apiEndpoint + "atlases/" + parcellation.AtlasId + "/parcellations/" + parcellation.Id + "/regions");
+            regions = webread(Siibra.apiEndpoint + "atlases/" + parcellation.AtlasId + "/parcellations/" + parcellation.Id + "/regions");
             root.name = parcellation.Name;
             root.children = regions;
             [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);

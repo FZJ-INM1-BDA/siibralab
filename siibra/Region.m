@@ -39,11 +39,12 @@ classdef Region
             if obj.space_url == ""
                 error("This region has no region map!");
             end
-            nifti_data = api_call(obj.space_url);
+            nifti_data = webread(obj.space_url);
             file_handle = fopen("tmp_nifti.nii.gz", "w");
             fwrite(file_handle, nifti_data);
             fclose(file_handle);
             pmap = cast(niftiread("tmp_nifti.nii.gz") * 255, "uint8");
+            
         end
         function template = getTemplate(obj)
             % currently "MNI152 2009c nonl asym" is supported only 

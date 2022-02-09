@@ -19,18 +19,8 @@ classdef NeuroglancerAdapter < images.blocked.Adapter
         function info = getInfo(obj)
             
             % Read  info
-            import matlab.net.*
-            import matlab.net.http.*
-            import matlab.net.http.io.*
-            json_accept = matlab.net.http.MediaType('application/json');
-            acceptField = matlab.net.http.field.AcceptField([json_accept]);
-            header = [acceptField];
-            method = matlab.net.http.RequestMethod.GET;
-            request = matlab.net.http.RequestMessage(method,header);
-            options = HTTPOptions;
-            consumer = JSONConsumer;
-            resp = send(request,URI(append(obj.uri, "info")), options, consumer);
-            fetched_info = resp.Body.Data;
+            options = weboptions("ContentType", "json");
+            fetched_info = webread(append(obj.uri, "info"), options);
             
             levels = numel(fetched_info.scales);
             obj.level_key = strings(levels, 1);
@@ -47,8 +37,6 @@ classdef NeuroglancerAdapter < images.blocked.Adapter
 
         
         function block = getIOBlock(obj,ioblockSub,level)
-            import matlab.net.*
-            import matlab.net.http.*
             level_str = obj.level_key(level);
             pixel_start_offset = (ioblockSub - 1) .* obj.Info.IOBlockSize(level);
             pixel_end_offset = min(ioblockSub .* obj.Info.IOBlockSize(level), obj.Info.Size(level));
@@ -56,14 +44,11 @@ classdef NeuroglancerAdapter < images.blocked.Adapter
             offsets = offsets(:).';
             
             block_str = sprintf("%d-%d_%d-%d_%d-%d", offsets);
-            uri = URI(append(obj.uri,level_str, "/", block_str));
-            %disp(uri.EncodedPath);
-            % request data
-            r = RequestMessage;
-            resp = send(r,uri);
-            chunk_size = obj.Info.IOBlockSize(level, :);
+            option = weboptions("ContentType", "raw");
+            recv_data = webread(append(obj.uri,level_str, "/", block_str), option);
             
-            reshaped_data = reshape(resp.Body.Data, chunk_size);
+            chunk_size = obj.Info.IOBlockSize(level, :);
+            reshaped_data = reshape(recv_data, chunk_size);
             block = reshaped_data;
         end
 

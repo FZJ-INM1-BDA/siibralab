@@ -1,29 +1,48 @@
-classdef Parcellation
+classdef Parcellation < handle
     properties
         Id
         Name
-        AtlasId
+        Atlas
+        Modality
+        Description
         Graph
+        Spaces
     end
+
     methods
-        function parcellation = Parcellation(id, name, atlasId)
-            parcellation.Id = strcat(id.kg.kgSchema, '/', id.kg.kgId);
-            parcellation.Name = name;
-            parcellation.AtlasId = atlasId;
+        function parcellation = Parcellation(parcellation_json, atlas)
+            parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
+            parcellation.Name = parcellation_json.name;
+            parcellation.Atlas = atlas;
+            parcellation.Modality = parcellation_json.modality;
+            if ~ isempty(parcellation_json.infos)
+                parcellation.Description = parcellation_json.infos(1).description;
+            end
+
+            % link spaces from atlas
+            parcellation.Spaces = Space.empty;
+            % retrieve available spaces from atlas
+            for available_space_index = 1:numel(parcellation_json.availableSpaces)
+                % store handle to space object
+                for atlas_space_index = 1:numel(atlas.Spaces.Space)
+                    if isequal(atlas.Spaces.Space(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
+                        parcellation.Spaces(end +1) = atlas.Spaces.Space(atlas_space_index);
+                    end
+                end
+            end
+            
             % call api to get parcellation tree
-            regions = webread(Siibra.apiEndpoint + "atlases/" + parcellation.AtlasId + "/parcellations/" + parcellation.Id + "/regions");
-            root.name = parcellation.Name;
-            root.children = regions;
-            [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);
-            % append root node
-            nodes = target;
-            nodes(length(nodes) + 1) = root.name;
-            region(length(region) + 1) = Region(root.name, "root", parcellation, []);
-            % make nodes unique
-            [unique_nodes, unique_indices, ~] = unique(nodes);
-            nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
+            regions = webread(parcellation_json.links.regions.href);
+            
             % store graph
-            parcellation.Graph = digraph(source, target, zeros(length(target), 1),  nodeTable);
+            parcellation.Graph = Parcellation.createParcellationTree(parcellation, regions);
+            
+            
+            %parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
+        end
+        %getters
+        function space_table = spaceTable(obj)  
+            space_table = table(string({obj.Spaces.Name}).', obj.Spaces.', 'VariableNames', {'Name', 'Space'});
         end
         function region = getRegion(obj, region_name_query)
             nodeId = obj.Graph.findnode(region_name_query);
@@ -34,8 +53,30 @@ classdef Parcellation
             childrenIds = obj.Graph.successors(nodeId);
             children = obj.Graph.Nodes.Name(childrenIds);
         end
+        function parent = getParentName(obj, region_name)
+            nodeId = obj.Graph.findnode(region_name);
+            parents = obj.Graph.predecessors(nodeId);
+            assert(length(parents) == 1, "Expect just one parent in a tree structure");
+            parentID = parents(1);
+            parent_cell = obj.Graph.Nodes.Name(parentID);
+            parent = parent_cell{1};
+        end
     end
     methods (Static)
+        function tree = createParcellationTree(parcellation, regions)
+            root.name = parcellation.Name;
+            root.children = regions;
+            [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);
+            % append root node
+            nodes = target;
+            nodes(length(nodes) + 1) = root.name;
+            region(length(region) + 1) = Region(root.name, "root", parcellation, []);
+            % make nodes unique
+            [unique_nodes, unique_indices, ~] = unique(nodes);
+            nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
+            tree = digraph(source, target, zeros(length(target), 1),  nodeTable);
+        end
+
         function [source, target, regions] = traverseTree(parcellation, root, source, target, regions)
             % Parses the parcellation tree.
             % Recursively calls itself to parse the children of the current

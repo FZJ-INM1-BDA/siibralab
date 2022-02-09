@@ -1,72 +1,69 @@
-classdef Region
+classdef Region < handle
     properties
-        name
-        id
-        parcellation
-        space_url
+        Name
+        ID
+        Parcellation
+        SpaceAndRegionUrl
     end
     methods
         function region = Region(name, id, parcellation, dataset_specs)
-            region.name = name;
-            region.id = id;
-            region.parcellation = parcellation;
+            region.Name = name;
+            region.ID = id;
+            region.Parcellation = parcellation;
+            
+            space_and_region_url.Spaces = Space.empty;
+            space_and_region_url.Url = string.empty;
+            space_ids = string.empty;
+            space_urls = string.empty;
 
             % parse dataset_specs for this region
             if ~isempty(dataset_specs)
                 for i = 1:numel(dataset_specs)
-                    if iscell(dataset_specs)
-                        space_id = dataset_specs{i, 1}.space_id;
-                        url = dataset_specs{i, 1}.url;
-                    else
-                        space_id = dataset_specs(i).space_id;
-                        url = dataset_specs(i).url;
-                    end
-                    % currently "MNI152 2009c nonl asym" is supported only 
-                    if space_id == "minds/core/referencespace/v1.0.0/dafcffc5-4826-4bf1-8ff6-46b8a31ff8e2"
-                        region.space_url = url;
-                        break;
+                    if iscell(dataset_specs) && isfield(dataset_specs{i, 1}, "space_id")
+                        space_ids(end +1) = dataset_specs{i, 1}.space_id;
+                        space_urls(end +1) = dataset_specs{i, 1}.url;
+                    elseif isfield(dataset_specs(i), "space_id")
+                        space_ids(end +1) = dataset_specs(i).space_id;
+                        space_urls(end +1) = dataset_specs(i).url;
                     end
                 end
-            else
-                % if no region map available
-                region.space_url = "";
             end
+            for region_index = 1:numel(space_ids)
+                for parcellation_index = 1:numel(parcellation.Spaces)
+                    if space_ids(region_index) == parcellation.Spaces(parcellation_index).ID
+                        space_and_region_url.Spaces(end + 1) = parcellation.Spaces(parcellation_index);
+                        space_and_region_url.Url(end + 1) = space_urls(region_index);
+                        break
+                    end
+                end
+            end
+            region.SpaceAndRegionUrl = space_and_region_url;
+        end
+
+        function parent = getParentName(obj)
+            parent = obj.Parcellation.getParentName(obj.Name);
         end
         function children = getChildrenNames(obj)
-            children = obj.parcellation.getChildrenNames(obj.name);
+            children = obj.Parcellation.getChildrenNames(obj.Name);
         end
-        function pmap = probabilityMap(obj)
-            if obj.space_url == ""
-                error("This region has no region map!");
+        function pmap = probabilityMap(obj, space_name)
+            found_space = false;
+            for i = 1:numel(obj.SpaceAndRegionUrl)
+                if obj.SpaceAndRegionUrl(i).Space.Name == space_name
+                    found_space = true;
+                    nifti_data = webread(obj.SpaceAndRegionUrl.Url);
+                    assert(obj.SpaceAndRegionUrl(i).Space.Format == 'nii', "Currently supports nii format only")
+                    file_handle = fopen("tmp_nifti.nii.gz", "w");
+                    fwrite(file_handle, nifti_data);
+                    fclose(file_handle);
+                    pmap = cast(niftiread("tmp_nifti.nii.gz") * 255, "uint8");
+                    delete "tmp_nifti.nii.gz"
+                end
             end
-            nifti_data = webread(obj.space_url);
-            file_handle = fopen("tmp_nifti.nii.gz", "w");
-            fwrite(file_handle, nifti_data);
-            fclose(file_handle);
-            pmap = cast(niftiread("tmp_nifti.nii.gz") * 255, "uint8");
+            if ~found_space
+                error("Could not find probability map for this space!");
+            end
             
-        end
-        function template = getTemplate(obj)
-            % currently "MNI152 2009c nonl asym" is supported only 
-            template = niftiread("siibra/templates/mni_icbm152_t1_tal_nlin_sym_09a_converted.nii.gz");
-        end
-        function volume = visualizeRegionInTemplate(obj)
-            % Combine the probability map of the region with
-            % its corresponding template.
-            pmap = obj.probabilityMap();
-            template = obj.getTemplate();
-            
-            % to rgb
-            pmap_rgb = cat(4, pmap, zeros(size(pmap)), zeros(size(pmap)));
-            template_rgb = cat(4, template, template, template);
-            
-            % cutout
-            cutout = min(size(template), size(pmap));
-            pmap_rgb = pmap_rgb(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
-            template_rgb = template_rgb(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
-            
-            % mix both layer
-            volume = pmap_rgb .*0.5 + template_rgb .*0.5;
         end
     end
 end

@@ -39,10 +39,13 @@ classdef Region < handle
             end
             region.SpaceAndRegionUrl = space_and_region_url;
         end
-
-        function parent = getParentName(obj)
-            parent = obj.Parcellation.getParentName(obj.Name);
+        function parent_region = getParentRegion(obj)
+            parent_region = obj.Parcellation.getParentRegion(obj.Name);
         end
+        function parent_name = getParentName(obj)
+            parent_name = obj.Parcellation.getParentName(obj.Name);
+        end
+    
         function children = getChildrenNames(obj)
             children = obj.Parcellation.getChildrenNames(obj.Name);
         end

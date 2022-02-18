@@ -18,7 +18,20 @@ classdef Space < handle
             space.Format = space_json.type;
             space.VolumeType = space_json.src_volume_type;
             space.TemplateURL = space_json.links.templates.href;
-        end     
+        end
+        function template = getTemplate(obj)
+            cached_path = strcat("template_cache/", obj.Name, ".nii");
+            if isfile(cached_path)
+                template = niftiread(cached_path);
+            else
+                options = weboptions;
+                options.Timeout = 30;
+                websave(cached_path, obj.TemplateURL, options);
+                template = niftiread(cached_path);
+            end
+            
+
+        end
     end
 end
 

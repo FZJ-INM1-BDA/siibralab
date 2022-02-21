@@ -26,5 +26,12 @@ classdef Siibra < handle
             end
             %parcellations = unique(parcellations);
         end
+        function spaces = Spaces(obj)
+            spaces = table;
+            for i = 1:numel(obj.Atlases.Atlas)
+                atlas = obj.Atlases.Atlas(i);
+                spaces = [spaces; atlas.Spaces];
+            end
+        end
     end
 end

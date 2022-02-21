@@ -44,6 +44,14 @@ classdef Parcellation < handle
         function space_table = spaceTable(obj)  
             space_table = table(string({obj.Spaces.Name}).', obj.Spaces.', 'VariableNames', {'Name', 'Space'});
         end
+        function region_table = findRegion(obj, region_name_query)
+            region_table = obj.Graph.Nodes(contains(obj.Graph.Nodes.Name, region_name_query), :);
+        end
+        function region = decodeRegion(obj, region_name_query)
+            region_table = obj.findRegion(region_name_query);
+            assert(height(region_table) == 1, "query was not unambiguous!")
+            region = region_table.Region(1);
+        end
         function region = getRegion(obj, region_name_query)
             nodeId = obj.Graph.findnode(region_name_query);
             region = obj.Graph.Nodes.Region(nodeId);
@@ -53,13 +61,16 @@ classdef Parcellation < handle
             childrenIds = obj.Graph.successors(nodeId);
             children = obj.Graph.Nodes.Name(childrenIds);
         end
-        function parent = getParentName(obj, region_name)
+        function parent_region = getParentRegion(obj, region_name)
             nodeId = obj.Graph.findnode(region_name);
             parents = obj.Graph.predecessors(nodeId);
             assert(length(parents) == 1, "Expect just one parent in a tree structure");
             parentID = parents(1);
-            parent_cell = obj.Graph.Nodes.Name(parentID);
-            parent = parent_cell{1};
+            parent_region = obj.Graph.Nodes.Region(parentID);
+        end
+        function parent_name = getParentName(obj, region_name)
+            parent_region = obj.getParentRegion(region_name);
+            parent_name = parent_region.Name;
         end
     end
     methods (Static)

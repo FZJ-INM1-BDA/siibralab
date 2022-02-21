@@ -5,7 +5,7 @@ classdef Parcellation < handle
         Atlas
         Modality
         Description
-        Graph
+        regionTree
         Spaces
     end
 
@@ -35,7 +35,7 @@ classdef Parcellation < handle
             regions = webread(parcellation_json.links.regions.href);
             
             % store graph
-            parcellation.Graph = Parcellation.createParcellationTree(parcellation, regions);
+            parcellation.regionTree = Parcellation.createParcellationTree(parcellation, regions);
             
             
             %parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
@@ -45,7 +45,7 @@ classdef Parcellation < handle
             space_table = table(string({obj.Spaces.Name}).', obj.Spaces.', 'VariableNames', {'Name', 'Space'});
         end
         function region_table = findRegion(obj, region_name_query)
-            region_table = obj.Graph.Nodes(contains(obj.Graph.Nodes.Name, region_name_query), :);
+            region_table = obj.regionTree.Nodes(contains(obj.regionTree.Nodes.Name, region_name_query), :);
         end
         function region = decodeRegion(obj, region_name_query)
             region_table = obj.findRegion(region_name_query);
@@ -53,20 +53,20 @@ classdef Parcellation < handle
             region = region_table.Region(1);
         end
         function region = getRegion(obj, region_name_query)
-            nodeId = obj.Graph.findnode(region_name_query);
-            region = obj.Graph.Nodes.Region(nodeId);
+            nodeId = obj.regionTree.findnode(region_name_query);
+            region = obj.regionTree.Nodes.Region(nodeId);
         end
         function children = getChildrenNames(obj, region_name)
-            nodeId = obj.Graph.findnode(region_name);
-            childrenIds = obj.Graph.successors(nodeId);
-            children = obj.Graph.Nodes.Name(childrenIds);
+            nodeId = obj.regionTree.findnode(region_name);
+            childrenIds = obj.regionTree.successors(nodeId);
+            children = obj.regionTree.Nodes.Name(childrenIds);
         end
         function parent_region = getParentRegion(obj, region_name)
-            nodeId = obj.Graph.findnode(region_name);
-            parents = obj.Graph.predecessors(nodeId);
+            nodeId = obj.regionTree.findnode(region_name);
+            parents = obj.regionTree.predecessors(nodeId);
             assert(length(parents) == 1, "Expect just one parent in a tree structure");
             parentID = parents(1);
-            parent_region = obj.Graph.Nodes.Region(parentID);
+            parent_region = obj.regionTree.Nodes.Region(parentID);
         end
         function parent_name = getParentName(obj, region_name)
             parent_region = obj.getParentRegion(region_name);

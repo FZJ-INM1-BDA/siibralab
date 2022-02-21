@@ -33,5 +33,15 @@ classdef Siibra < handle
                 spaces = [spaces; atlas.Spaces];
             end
         end
+        function atlas = getAtlas(obj, atlas_query)
+            atlas_names = lower(obj.Atlases.Name.');
+            difflib = py.importlib.import_module('difflib');
+            python_matched_names = difflib.get_close_matches(atlas_query, atlas_names, py.int(1), 0.3);
+            matched_names = cellfun(@char,cell(python_matched_names),'UniformOutput',false);
+            if isempty(matched_names)
+                error ("Cannot find atlas for query " + atlas_query);
+            end
+            atlas = obj.Atlases.Atlas(find(ismember(atlas_names, matched_names{1})));
+        end
     end
 end

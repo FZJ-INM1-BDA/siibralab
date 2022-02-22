@@ -33,5 +33,9 @@ classdef Atlas < handle
             parcellationNames = {obj.parcellations.name};
             parcellation = obj.parcellations(siibra.internal.fuzzyMatching(parcellation_name_query, parcellationNames));
         end
+        function space = space(obj, spaceName)
+            spaceNames = {obj.spaces.name};
+            space = obj.spaces(siibra.internal.fuzzyMatching(spaceName, spaceNames));
+        end
     end
 end

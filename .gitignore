@@ -1,5 +1,4 @@
-.DS_Store
+*.DS_Store
 *.asv
-tmp_nifti.nii.gz
 screen-shots/
-siibra/template_cache/
++siibra/cache/

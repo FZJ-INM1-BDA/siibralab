@@ -25,7 +25,7 @@ classdef Parcellation < handle
             for available_space_index = 1:numel(parcellation_json.availableSpaces)
                 % store handle to space object
                 for atlas_space_index = 1:numel(atlas.spaces)
-                    if isequal(atlas.spaces(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
+                    if isequal(atlas.spaces(atlas_space_index).id, parcellation_json.availableSpaces(available_space_index).id)
                         parcellation.spaces(end +1) = atlas.spaces(atlas_space_index);
                     end
                 end
@@ -39,12 +39,9 @@ classdef Parcellation < handle
             
             %parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
         end
-        %getters
-        function space_table = spaceTable(obj)  
-            space_table = table(string({obj.spaces.Name}).', obj.spaces.', 'VariableNames', {'Name', 'Space'});
-        end
-        function region_table = findRegion(obj, region_name_query)
-            region_table = obj.regionTree.Nodes(contains(obj.regionTree.Nodes.Name, region_name_query), :);
+       
+        function region_names = findRegion(obj, region_name_query)
+            region_names = obj.regionTree.Nodes(contains(obj.regionTree.Nodes.Name, region_name_query), 1);
         end
         function region = decodeRegion(obj, region_name_query)
             region_table = obj.findRegion(region_name_query);
@@ -55,10 +52,10 @@ classdef Parcellation < handle
             nodeId = obj.regionTree.findnode(region_name_query);
             region = obj.regionTree.Nodes.Region(nodeId);
         end
-        function children = getChildrenNames(obj, region_name)
+        function children = getChildrenRegions(obj, region_name)
             nodeId = obj.regionTree.findnode(region_name);
             childrenIds = obj.regionTree.successors(nodeId);
-            children = obj.regionTree.Nodes.Name(childrenIds);
+            children = obj.regionTree.Nodes.Region(childrenIds);
         end
         function parent_region = getParentRegion(obj, region_name)
             nodeId = obj.regionTree.findnode(region_name);
@@ -66,10 +63,6 @@ classdef Parcellation < handle
             assert(length(parents) == 1, "Expect just one parent in a tree structure");
             parentID = parents(1);
             parent_region = obj.regionTree.Nodes.Region(parentID);
-        end
-        function parent_name = getParentName(obj, region_name)
-            parent_region = obj.getParentRegion(region_name);
-            parent_name = parent_region.Name;
         end
     end
     methods (Static)

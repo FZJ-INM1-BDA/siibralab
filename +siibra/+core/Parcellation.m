@@ -1,32 +1,32 @@
 classdef Parcellation < handle
     properties
-        Id
-        Name
-        Atlas
-        Modality
-        Description
+        id
+        name
+        atlas
+        modality
+        desciption
         regionTree
-        Spaces
+        spaces
     end
 
     methods
         function parcellation = Parcellation(parcellation_json, atlas)
-            parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
-            parcellation.Name = parcellation_json.name;
-            parcellation.Atlas = atlas;
-            parcellation.Modality = parcellation_json.modality;
+            parcellation.id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
+            parcellation.name = parcellation_json.name;
+            parcellation.atlas = atlas;
+            parcellation.modality = parcellation_json.modality;
             if ~ isempty(parcellation_json.infos)
-                parcellation.Description = parcellation_json.infos(1).description;
+                parcellation.desciption = parcellation_json.infos(1).description;
             end
 
             % link spaces from atlas
-            parcellation.Spaces = Space.empty;
+            parcellation.spaces = siibra.core.Space.empty;
             % retrieve available spaces from atlas
             for available_space_index = 1:numel(parcellation_json.availableSpaces)
                 % store handle to space object
-                for atlas_space_index = 1:numel(atlas.Spaces.Space)
-                    if isequal(atlas.Spaces.Space(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
-                        parcellation.Spaces(end +1) = atlas.Spaces.Space(atlas_space_index);
+                for atlas_space_index = 1:numel(atlas.spaces)
+                    if isequal(atlas.spaces(atlas_space_index).ID, parcellation_json.availableSpaces(available_space_index).id)
+                        parcellation.spaces(end +1) = atlas.spaces(atlas_space_index);
                     end
                 end
             end
@@ -35,14 +35,13 @@ classdef Parcellation < handle
             regions = webread(parcellation_json.links.regions.href);
             
             % store graph
-            parcellation.regionTree = Parcellation.createParcellationTree(parcellation, regions);
-            
+            parcellation.regionTree = siibra.core.Parcellation.createParcellationTree(parcellation, regions);
             
             %parcellation.Spaces = table(string({spaces_subset.Name}).', spaces_subset.', 'VariableNames', {'Name', 'Space'});
         end
         %getters
         function space_table = spaceTable(obj)  
-            space_table = table(string({obj.Spaces.Name}).', obj.Spaces.', 'VariableNames', {'Name', 'Space'});
+            space_table = table(string({obj.spaces.Name}).', obj.spaces.', 'VariableNames', {'Name', 'Space'});
         end
         function region_table = findRegion(obj, region_name_query)
             region_table = obj.regionTree.Nodes(contains(obj.regionTree.Nodes.Name, region_name_query), :);
@@ -75,13 +74,13 @@ classdef Parcellation < handle
     end
     methods (Static)
         function tree = createParcellationTree(parcellation, regions)
-            root.name = parcellation.Name;
+            root.name = parcellation.name;
             root.children = regions;
-            [source, target, region] = Parcellation.traverseTree(parcellation, root, string.empty, string.empty, Region.empty);
+            [source, target, region] = siibra.core.Parcellation.traverseTree(parcellation, root, string.empty, string.empty, siibra.core.Region.empty);
             % append root node
             nodes = target;
             nodes(length(nodes) + 1) = root.name;
-            region(length(region) + 1) = Region(root.name, "root", parcellation, []);
+            region(length(region) + 1) = siibra.core.Region(root.name, "root", parcellation, []);
             % make nodes unique
             [unique_nodes, unique_indices, ~] = unique(nodes);
             nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
@@ -98,8 +97,8 @@ classdef Parcellation < handle
                 child = root.children(child_num);
                 source(length(source) + 1) = root.name;
                 target(length(target) + 1) = child.name;
-                regions(length(regions) + 1) = Region(child.name, child.id, parcellation, child.x_dataset_specs);
-                [source, target, regions] = Parcellation.traverseTree(parcellation, child, source, target, regions);
+                regions(length(regions) + 1) = siibra.core.Region(child.name, child.id, parcellation, child.x_dataset_specs);
+                [source, target, regions] = siibra.core.Parcellation.traverseTree(parcellation, child, source, target, regions);
             end
         end
     end

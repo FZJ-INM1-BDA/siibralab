@@ -20,7 +20,7 @@ classdef Space < handle
             space.TemplateURL = space_json.links.templates.href;
         end
         function template = getTemplate(obj)
-            cached_path = strcat("template_cache/", obj.Name, ".nii");
+            cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
             if isfile(cached_path)
                 template = niftiread(cached_path);
             else

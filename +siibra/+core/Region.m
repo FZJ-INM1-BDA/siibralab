@@ -1,17 +1,17 @@
 classdef Region < handle
     properties
-        Name
-        ID
-        Parcellation
-        SpaceAndRegionUrl
+        name
+        id
+        parcellation
+        spaceAndRegionUrl
     end
     methods
         function region = Region(name, id, parcellation, dataset_specs)
-            region.Name = name;
-            region.ID = id;
-            region.Parcellation = parcellation;
+            region.name = name;
+            region.id = id;
+            region.parcellation = parcellation;
             
-            space_and_region_url.Spaces = Space.empty;
+            space_and_region_url.Spaces = siibra.core.Space.empty;
             space_and_region_url.Url = string.empty;
             space_ids = string.empty;
             space_urls = string.empty;
@@ -29,33 +29,33 @@ classdef Region < handle
                 end
             end
             for region_index = 1:numel(space_ids)
-                for parcellation_index = 1:numel(parcellation.Spaces)
-                    if space_ids(region_index) == parcellation.Spaces(parcellation_index).ID
-                        space_and_region_url.Spaces(end + 1) = parcellation.Spaces(parcellation_index);
+                for parcellation_index = 1:numel(parcellation.spaces)
+                    if space_ids(region_index) == parcellation.spaces(parcellation_index).ID
+                        space_and_region_url.Spaces(end + 1) = parcellation.spaces(parcellation_index);
                         space_and_region_url.Url(end + 1) = space_urls(region_index);
                         break
                     end
                 end
             end
-            region.SpaceAndRegionUrl = space_and_region_url;
+            region.spaceAndRegionUrl = space_and_region_url;
         end
         function parent_region = getParentRegion(obj)
-            parent_region = obj.Parcellation.getParentRegion(obj.Name);
+            parent_region = obj.parcellation.getParentRegion(obj.name);
         end
         function parent_name = getParentName(obj)
-            parent_name = obj.Parcellation.getParentName(obj.Name);
+            parent_name = obj.parcellation.getParentName(obj.name);
         end
     
         function children = getChildrenNames(obj)
-            children = obj.Parcellation.getChildrenNames(obj.Name);
+            children = obj.parcellation.getChildrenNames(obj.name);
         end
         function pmap = probabilityMap(obj, space_name)
             found_space = false;
-            for i = 1:numel(obj.SpaceAndRegionUrl)
-                if obj.SpaceAndRegionUrl(i).Space.Name == space_name
+            for i = 1:numel(obj.spaceAndRegionUrl)
+                if obj.spaceAndRegionUrl(i).Space.Name == space_name
                     found_space = true;
-                    nifti_data = webread(obj.SpaceAndRegionUrl.Url);
-                    assert(obj.SpaceAndRegionUrl(i).Space.Format == 'nii', "Currently supports nii format only")
+                    nifti_data = webread(obj.spaceAndRegionUrl.Url);
+                    assert(obj.spaceAndRegionUrl(i).Space.Format == 'nii', "Currently supports nii format only")
                     file_handle = fopen("tmp_nifti.nii.gz", "w");
                     fwrite(file_handle, nifti_data);
                     fclose(file_handle);

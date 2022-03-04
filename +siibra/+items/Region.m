@@ -1,17 +1,15 @@
 classdef Region < handle
     properties
-        Name
-        Id
-        Parcellation
-        SpaceAndRegionUrl
-        Spaces
-        Parent
-        Children
+        Name string
+        Parcellation (1, :) siibra.items.Parcellation
+        SpaceAndRegionUrl (1, :) struct
+        Spaces (1, :) siibra.items.Space
+        Parent (1, 1) % Region
+        Children (1, :) % Region
     end
     methods
-        function region = Region(name, id, parcellation, dataset_specs)
+        function region = Region(name, parcellation, dataset_specs)
             region.Name = name;
-            region.Id = id;
             region.Parcellation = parcellation;
             
             spaceAndRegion.spaces = siibra.items.Space.empty;
@@ -96,7 +94,6 @@ classdef Region < handle
             if ~found_space
                 error("Could not find probability map for this space!");
             end
-            
         end
     end
 end

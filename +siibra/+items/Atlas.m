@@ -1,9 +1,9 @@
 classdef Atlas < handle
     properties
-        Id
-        Name
-        Parcellations
-        Spaces
+        Id (1, 1) string
+        Name (1, 1) string
+        Parcellations (1, :) siibra.items.Parcellation
+        Spaces (1, :) siibra.items.Space
     end
     methods
         function atlas = Atlas(atlas_json)
@@ -30,11 +30,19 @@ classdef Atlas < handle
             
         end
         function parcellation = getParcellation(obj, parcellation_name_query)
-            parcellationNames = {obj.Parcellations.Name};
+            arguments
+                obj 
+                parcellation_name_query (1, 1) string
+            end
+            parcellationNames = [obj.Parcellations.Name];
             parcellation = obj.Parcellations(siibra.internal.fuzzyMatching(parcellation_name_query, parcellationNames));
         end
         function space = getSpace(obj, spaceName)
-            spaceNames = {obj.Spaces.Name};
+            arguments
+                obj
+                spaceName (1, 1) string
+            end
+            spaceNames = [obj.Spaces.Name];
             space = obj.Spaces(siibra.internal.fuzzyMatching(spaceName, spaceNames));
         end
     end

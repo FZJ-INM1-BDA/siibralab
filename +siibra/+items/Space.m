@@ -1,12 +1,12 @@
 classdef Space < handle
     
     properties
-        Id
-        Name
-        TemplateURL
-        Format
-        VolumeType
-        AtlasId
+        Id (1, 1) string
+        Name (1, 1) string
+        TemplateURL (1, 1) string
+        Format (1, 1) string
+        VolumeType (1, 1) string
+        AtlasId (1, 1) string
     end
     
     methods
@@ -31,4 +31,3 @@ classdef Space < handle
         end
     end
 end
-

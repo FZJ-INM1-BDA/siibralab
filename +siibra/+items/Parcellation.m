@@ -1,12 +1,12 @@
 classdef Parcellation < handle
     properties
-        Id
-        Name
-        Atlas
-        Modality
-        Desciption
-        RegionTree
-        Spaces
+        Id (1, 1) string
+        Name (1, 1) string
+        Atlas (1, :) siibra.items.Atlas
+        Modality % no consistent type yet
+        Desciption (1, 1) string
+        RegionTree (1, 1) digraph
+        Spaces (1, :) siibra.items.Space
     end
 
     methods
@@ -73,7 +73,7 @@ classdef Parcellation < handle
             % append root node
             nodes = target;
             nodes(length(nodes) + 1) = root.name;
-            region(length(region) + 1) = siibra.items.Region(root.name, "root", parcellation, []);
+            region(length(region) + 1) = siibra.items.Region(root.name, parcellation, []);
             % make nodes unique
             [unique_nodes, unique_indices, ~] = unique(nodes);
             nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
@@ -90,7 +90,7 @@ classdef Parcellation < handle
                 child = root.children(child_num);
                 source(length(source) + 1) = root.name;
                 target(length(target) + 1) = child.name;
-                regions(length(regions) + 1) = siibra.items.Region(child.name, child.id, parcellation, child.x_dataset_specs);
+                regions(length(regions) + 1) = siibra.items.Region(child.name, parcellation, child.x_dataset_specs);
                 [source, target, regions] = siibra.items.Parcellation.traverseTree(parcellation, child, source, target, regions);
             end
         end

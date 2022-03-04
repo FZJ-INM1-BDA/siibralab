@@ -1,4 +1,7 @@
 function atlases = initAtlases(clear_cache)
+arguments
+    clear_cache (1, 1) logical
+end
     cached_file_name = '+siibra/cache/atlases.mat';
     if clear_cache || ~isfile(cached_file_name)
         apiEndpoint = "https://siibra-api-latest.apps-dev.hbp.eu/v1_0/";

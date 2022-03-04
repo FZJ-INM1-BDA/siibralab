@@ -1,4 +1,6 @@
 *.DS_Store
 *.asv
 screen-shots/
-+siibra/cache/
++siibra/cache/atlases.mat
++siibra/cache/region_cache/*
++siibra/cache/template_cache/*

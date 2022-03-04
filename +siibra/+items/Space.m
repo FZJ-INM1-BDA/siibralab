@@ -21,16 +21,13 @@ classdef Space < handle
         end
         function template = getTemplate(obj)
             cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
-            if isfile(cached_path)
-                template = niftiread(cached_path);
-            else
+            if ~isfile(cached_path)
                 options = weboptions;
                 options.Timeout = 30;
                 websave(cached_path, obj.TemplateURL, options);
-                template = niftiread(cached_path);
-                
             end
-            template = cast(template, "uint16");
+            template = niftiread(cached_path);
+            template = template ./ max(template(:));
         end
     end
 end

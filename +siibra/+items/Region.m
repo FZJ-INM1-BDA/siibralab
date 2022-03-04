@@ -73,7 +73,6 @@ classdef Region < handle
             pmapRGB = pmapRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
             templateRGB = templateRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
 
-
             % mix both layer
             volume = pmapRGB .*0.5 + templateRGB;
 
@@ -82,15 +81,16 @@ classdef Region < handle
             found_space = false;
             for i = 1:numel(obj.SpaceAndRegionUrl.spaces)
                 if strcmp(obj.SpaceAndRegionUrl.spaces(i).Name, space_name)
+                    assert(strcmp(obj.SpaceAndRegionUrl.spaces(i).Format, 'nii'), "Currently supports nii format only")
                     found_space = true;
-                    nifti_data = webread(obj.SpaceAndRegionUrl.url(i));
-                    assert(strcmp(obj.SpaceAndRegionUrl.spaces(i).format, 'nii'), "Currently supports nii format only")
-                    tmp_path = '+siibra/cache/tmp_nifti.nii.gz';
-                    file_handle = fopen(tmp_path, "w");
-                    fwrite(file_handle, nifti_data);
-                    fclose(file_handle);
-                    pmap = cast(niftiread(tmp_path) * 2^16, "uint16");
-                    delete(tmp_path);
+                    cache_path = strcat("+siibra/cache/region_cache/", strrep(obj.Name, " ", ""), strrep(space_name, " ", ""), ".nii.gz");
+                    if ~isfile(cache_path)
+                        nifti_data = webread(obj.SpaceAndRegionUrl.url(i));
+                        file_handle = fopen(cache_path, "w");
+                        fwrite(file_handle, nifti_data);
+                        fclose(file_handle);
+                    end
+                    pmap = niftiread(cache_path);
                 end
             end
             if ~found_space

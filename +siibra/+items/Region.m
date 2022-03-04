@@ -1,20 +1,20 @@
 classdef Region < handle
     properties
-        name
-        id
-        parcellation
-        spaceAndRegionUrl
-        spaces
-        parent
-        children
+        Name
+        Id
+        Parcellation
+        SpaceAndRegionUrl
+        Spaces
+        Parent
+        Children
     end
     methods
         function region = Region(name, id, parcellation, dataset_specs)
-            region.name = name;
-            region.id = id;
-            region.parcellation = parcellation;
+            region.Name = name;
+            region.Id = id;
+            region.Parcellation = parcellation;
             
-            spaceAndRegion.spaces = siibra.core.Space.empty;
+            spaceAndRegion.spaces = siibra.items.Space.empty;
             spaceAndRegion.url = string.empty;
             space_ids = string.empty;
             space_urls = string.empty;
@@ -32,36 +32,36 @@ classdef Region < handle
                 end
             end
             for region_index = 1:numel(space_ids)
-                for parcellation_index = 1:numel(parcellation.spaces)
-                    if space_ids(region_index) == parcellation.spaces(parcellation_index).id
-                        spaceAndRegion.spaces(end + 1) = parcellation.spaces(parcellation_index);
+                for parcellation_index = 1:numel(parcellation.Spaces)
+                    if space_ids(region_index) == parcellation.Spaces(parcellation_index).Id
+                        spaceAndRegion.spaces(end + 1) = parcellation.Spaces(parcellation_index);
                         spaceAndRegion.url(end + 1) = space_urls(region_index);
                         break
                     end
                 end
             end
-            region.spaceAndRegionUrl = spaceAndRegion;
+            region.SpaceAndRegionUrl = spaceAndRegion;
         end
 
-        function spaces = get.spaces(obj)
-            spaces = obj.spaceAndRegionUrl.spaces;
+        function spaces = get.Spaces(obj)
+            spaces = obj.SpaceAndRegionUrl.spaces;
         end
         function space = space(obj, spaceName)
-            spaceNames = {obj.spaceAndRegionUrl.spaces.name};
+            spaceNames = {obj.SpaceAndRegionUrl.spaces.Name};
             spaceIndex = siibra.internal.fuzzyMatching(spaceName, spaceNames);
-            space = obj.spaceAndRegionUrl.spaces(spaceIndex);
+            space = obj.SpaceAndRegionUrl.spaces(spaceIndex);
         end
-        function children = get.children(obj)
-            children = obj.parcellation.getChildrenRegions(obj.name);
+        function children = get.Children(obj)
+            children = obj.Parcellation.getChildRegions(obj.Name);
         end
-        function parent = get.parent(obj)
-            parent = obj.parcellation.getParentRegion(obj.name);
+        function parent = get.Parent(obj)
+            parent = obj.Parcellation.getParentRegion(obj.Name);
         end
         function volume = visualizeProbabilityMapInTemplate(obj, space_name)
             % Combine the probability map of the region with
             % its corresponding template.
             space = obj.space(space_name);
-            pmap = obj.probabilityMap(space.name);
+            pmap = obj.probabilityMap(space.Name);
             template = space.getTemplate();
 
             % to rgb
@@ -80,11 +80,11 @@ classdef Region < handle
         end
         function pmap = probabilityMap(obj, space_name)
             found_space = false;
-            for i = 1:numel(obj.spaceAndRegionUrl.spaces)
-                if strcmp(obj.spaceAndRegionUrl.spaces(i).name, space_name)
+            for i = 1:numel(obj.SpaceAndRegionUrl.spaces)
+                if strcmp(obj.SpaceAndRegionUrl.spaces(i).Name, space_name)
                     found_space = true;
-                    nifti_data = webread(obj.spaceAndRegionUrl.url(i));
-                    assert(strcmp(obj.spaceAndRegionUrl.spaces(i).format, 'nii'), "Currently supports nii format only")
+                    nifti_data = webread(obj.SpaceAndRegionUrl.url(i));
+                    assert(strcmp(obj.SpaceAndRegionUrl.spaces(i).format, 'nii'), "Currently supports nii format only")
                     tmp_path = '+siibra/cache/tmp_nifti.nii.gz';
                     file_handle = fopen(tmp_path, "w");
                     fwrite(file_handle, nifti_data);

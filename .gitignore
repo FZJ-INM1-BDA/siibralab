@@ -2,5 +2,3 @@
 *.asv
 screen-shots/
 +siibra/cache/atlases.mat
-+siibra/cache/region_cache/*
-+siibra/cache/template_cache/*

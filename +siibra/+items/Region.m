@@ -61,22 +61,10 @@ classdef Region < handle
             space = obj.space(space_name);
             pmap = obj.probabilityMap(space.Name);
             template = space.getTemplate();
-            
-            % Currently the template and probability maps support
-            % translation matrices only
-            pmap_offset = pmap.offsetRelativeTo(template);
-            pmap_start = max(-pmap_offset, 1);
-            template_start = max(pmap_offset, 1);
-            pmap_end = min((size(pmap.Data) - pmap_start), (size(template.Data)-template_start)) + 1;
-            pmap_cutout = pmap.Data(pmap_start(1):pmap_end(1), pmap_start(2):pmap_end(2), pmap_start(3):pmap_end(3));
-            padded_pmap = zeros(size(template.Data), class(pmap_cutout));
-            pmap_cutout_size = pmap_end - pmap_start + 1;
-            padded_pmap( ...
-                template_start(1):pmap_cutout_size(1), ...
-                template_start(2):pmap_cutout_size(2), ...
-                template_start(3):pmap_cutout_size(3)) = pmap_cutout;
+           
+            pmap_overlay = pmap.getOverlayRelativeTo(template);
             % to rgb
-            pmapRGB = cat(4, padded_pmap, zeros(size(padded_pmap)), zeros(size(padded_pmap)));
+            pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));
             templateRGB = cat(4, template.Data, template.Data, template.Data);
 
             % mix both layer

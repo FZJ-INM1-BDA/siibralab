@@ -61,21 +61,29 @@ classdef Region < handle
             space = obj.space(space_name);
             pmap = obj.probabilityMap(space.Name);
             template = space.getTemplate();
-
+            
+            % Currently the template and probability maps support
+            % translation matrices only
+            pmap_offset = pmap.offsetRelativeTo(template);
+            pmap_start = max(-pmap_offset, 1);
+            template_start = max(pmap_offset, 1);
+            pmap_end = min((size(pmap.Data) - pmap_start), (size(template.Data)-template_start)) + 1;
+            pmap_cutout = pmap.Data(pmap_start(1):pmap_end(1), pmap_start(2):pmap_end(2), pmap_start(3):pmap_end(3));
+            padded_pmap = zeros(size(template.Data), class(pmap_cutout));
+            pmap_cutout_size = pmap_end - pmap_start + 1;
+            padded_pmap( ...
+                template_start(1):pmap_cutout_size(1), ...
+                template_start(2):pmap_cutout_size(2), ...
+                template_start(3):pmap_cutout_size(3)) = pmap_cutout;
             % to rgb
-            pmapRGB = cat(4, pmap, zeros(size(pmap)), zeros(size(pmap)));
-            templateRGB = cat(4, template, template, template);
-
-            % cutout
-            cutout = min(size(template), size(pmap));
-            pmapRGB = pmapRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
-            templateRGB = templateRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
+            pmapRGB = cat(4, padded_pmap, zeros(size(padded_pmap)), zeros(size(padded_pmap)));
+            templateRGB = cat(4, template.Data, template.Data, template.Data);
 
             % mix both layer
             volume = pmapRGB .*0.5 + templateRGB;
 
         end
-        function pmap = probabilityMap(obj, space_name)
+        function niftiImage = probabilityMap(obj, space_name)
             found_space = false;
             for i = 1:numel(obj.SpaceAndRegionUrl.spaces)
                 if strcmp(obj.SpaceAndRegionUrl.spaces(i).Name, space_name)
@@ -88,7 +96,7 @@ classdef Region < handle
                         fwrite(file_handle, nifti_data);
                         fclose(file_handle);
                     end
-                    pmap = niftiread(cache_path);
+                    niftiImage = siibra.items.NiftiImage(cache_path);
                 end
             end
             if ~found_space

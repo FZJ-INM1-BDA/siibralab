@@ -1,6 +1,8 @@
 classdef NiftiImage
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    %NiftiImage Wrapper around a nifti file in memory
+    %   Each instance holds the raw data and the corresponding header.
+    %   This class exposes convenience methods to handle the warping
+    %   of the voxel data to physical space.
     
     properties
         Data (:, :, :)
@@ -9,8 +11,9 @@ classdef NiftiImage
     
     methods
         function obj = NiftiImage(path)
-            %UNTITLED Construct an instance of this class
-            %   Detailed explanation goes here
+            %NiftiImage Construct an instance of this class
+            %   Reads the data from disk and stores the voxel volume in RAS
+            %   orientation.
             header = niftiinfo(path);
             data = niftiread(path);
             

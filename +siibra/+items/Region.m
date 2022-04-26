@@ -61,15 +61,15 @@ classdef Region < handle
             space = obj.space(space_name);
             pmap = obj.probabilityMap(space.Name);
             template = space.getTemplate();
+            templateImage = template.getWarpedImage();
+            pmap_overlay = pmap.getOverlayWarpedRelativeTo(template);
            
-            pmap_overlay = pmap.getOverlayRelativeTo(template);
             % to rgb
             pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));
-            templateRGB = cat(4, template.Data, template.Data, template.Data);
+            templateRGB = cat(4, templateImage, templateImage, templateImage);
 
             % mix both layer
             volume = pmapRGB .*0.5 + templateRGB;
-
         end
         function niftiImage = probabilityMap(obj, space_name)
             found_space = false;

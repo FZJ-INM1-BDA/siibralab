@@ -14,7 +14,7 @@ end
     python_matched_names = difflib.get_close_matches(lowerQuery, cellstr(lowerHaystack), py.int(1), 0.3);
     matched_names = cellfun(@string,cell(python_matched_names),'UniformOutput',false);
     if isempty(matched_names)
-        error ("Cannot find candidate for query " + query);
+        error ("Empty result for query " + query);
     end
     matchedIndex = find(ismember(lowerHaystack, matched_names{1}));
 end

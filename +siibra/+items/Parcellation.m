@@ -64,7 +64,46 @@ classdef Parcellation < handle
             parentId = parents(1);
             parent_region = obj.RegionTree.Nodes.Region(parentId);
         end
+        function results = assign(obj, point)
+            spaceIndex = find(strcmp([obj.Spaces.Name], point.Space.Name));
+            assert(~isempty(spaceIndex), "Space of point is not supported by this parcellation!");
+            template = obj.Spaces(spaceIndex).Template;
+            template_output_view = template.getOutputView();
+            [voxelPositionOfPointX, voxelPositionOfPointY, voxelPositionOfPointZ]  = template_output_view.worldToIntrinsic(point.Position(1), point.Position(2), point.Position(3));
+            voxelPositionOfPointX = round(voxelPositionOfPointX)
+            voxelPositionOfPointY = round(voxelPositionOfPointY)
+            voxelPositionOfPointZ = round(voxelPositionOfPointZ)
+            % first pass to find out how many regions in this parcellation 
+            % support this space
+            nRegions = 0;
+            regionMask = zeros(length(obj.RegionTree.Nodes.Region), 'logical');
+            for i = 1:length(obj.RegionTree.Nodes.Region)
+                region = obj.RegionTree.Nodes.Region(i);
+                if any(strcmp([region.Spaces.Name], point.Space.Name))
+                    nRegions = nRegions + 1;
+                    regionMask(i) = true;
+                end  
+            end
+
+            completeMap = zeros([template.Size, nRegions]);
+            regionIndex = 1;
+            for i = 1:length(obj.RegionTree.Nodes.Region)
+                region = obj.RegionTree.Nodes.Region(i);
+                if any(strcmp([region.Spaces.Name], point.Space.Name))
+                    pmap = region.probabilityMap(point.Space.Name);
+                    completeMap(:, :, :, regionIndex) = pmap.Map;
+                    regionIndex = regionIndex + 1;
+                end
+            end
+            
+            regionProbabilities = completeMap(voxelPositionOfPointX, voxelPositionOfPointY, voxelPositionOfPointZ, :);
+             % regionsSupportingSpace = obj.RegionTree.Nodes.Region(regionMask);
+            relevantRegions = regionProbabilities > 0;
+            results = regionProbabilities(relevantRegions);
+        end
     end
+    
+
     methods (Static)
         function tree = createParcellationTree(parcellation, regions)
             root.name = parcellation.Name;

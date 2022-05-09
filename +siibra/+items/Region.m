@@ -55,36 +55,29 @@ classdef Region < handle
         function parent = get.Parent(obj)
             parent = obj.Parcellation.getParentRegion(obj.Name);
         end
-        function volume = visualizeProbabilityMapInTemplate(obj, space_name)
+        function orthosliceview = visualizeProbabilityMapInTemplate(obj, space_name)
             % Combine the probability map of the region with
             % its corresponding template.
             space = obj.space(space_name);
             pmap = obj.probabilityMap(space.Name);
-            template = space.getTemplate();
+            template = space.Template;
             templateImage = template.getWarpedImage();
-            pmap_overlay = pmap.getOverlayWarpedRelativeTo(template);
+            pmap_overlay = pmap.Map;
            
             % to rgb
             pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));
             templateRGB = cat(4, templateImage, templateImage, templateImage);
 
             % mix both layer
-            volume = pmapRGB .*0.5 + templateRGB;
+            orthosliceview = orthosliceViewer(pmapRGB .*0.5 + templateRGB);
         end
-        function niftiImage = probabilityMap(obj, space_name)
+        function map = probabilityMap(obj, space_name)
             found_space = false;
             for i = 1:numel(obj.SpaceAndRegionUrl.spaces)
                 if strcmp(obj.SpaceAndRegionUrl.spaces(i).Name, space_name)
                     assert(strcmp(obj.SpaceAndRegionUrl.spaces(i).Format, 'nii'), "Currently supports nii format only")
                     found_space = true;
-                    cache_path = strcat("+siibra/cache/region_cache/", strrep(obj.Name, " ", ""), strrep(space_name, " ", ""), ".nii.gz");
-                    if ~isfile(cache_path)
-                        nifti_data = webread(obj.SpaceAndRegionUrl.url(i));
-                        file_handle = fopen(cache_path, "w");
-                        fwrite(file_handle, nifti_data);
-                        fclose(file_handle);
-                    end
-                    niftiImage = siibra.items.NiftiImage(cache_path);
+                    map = siibra.items.ProbabilityMap(obj, obj.SpaceAndRegionUrl.spaces(i), obj.SpaceAndRegionUrl.url(i));
                 end
             end
             if ~found_space

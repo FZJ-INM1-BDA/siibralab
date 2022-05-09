@@ -7,6 +7,7 @@ classdef Space < handle
         Format (1, 1) string
         VolumeType (1, 1) string
         AtlasId (1, 1) string
+        Template (1, 1) %siibra.items.NiftiImage
     end
     
     methods
@@ -19,7 +20,7 @@ classdef Space < handle
             space.VolumeType = space_json.src_volume_type;
             space.TemplateURL = space_json.links.templates.href;
         end
-        function niftiImage = getTemplate(obj)
+        function niftiImage = get.Template(obj)
             cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
             if ~isfile(cached_path)
                 options = weboptions;

@@ -1,29 +1,33 @@
-classdef NiftiImage
-    %NiftiImage Wrapper around a nifti file in memory
-    %   Each instance holds the raw data and the corresponding header.
+classdef NiftiImage < handle
+    %NiftiImage Wrapper around a nifti file
+    %   Each instance holds the path to the data and the corresponding header.
     %   This class exposes convenience methods to handle the warping
     %   of the voxel data to physical space.
     
     properties
-        Data (:, :, :)
         Header (1, 1) 
+        FilePath 
+        Size
     end
     
     methods
         function obj = NiftiImage(path)
             %NiftiImage Construct an instance of this class
-            %   Reads the data from disk and stores the voxel volume in RAS
-            %   orientation.
-            header = niftiinfo(path);
-            data = niftiread(path);
-            
+            %   Reads the header from disk.
+            obj.FilePath = path;
+            obj.Header = niftiinfo(path);
+        end
+        function size = get.Size(obj)
+            size = obj.Header.ImageSize; 
+        end
+        function data = loadData(obj)
+            data = niftiread(obj.FilePath);
             % The permutation is necessary to align MATLAB indexing
             % with the RAS orientation.
-            obj.Data = permute(data, [2, 1, 3]);
-            obj.Header = header;
+            data = permute(data, [2, 1, 3]);
         end
         function normalized = normalizedData(obj)
-            normalized = obj.Data;
+            normalized = obj.loadData();
             if isfloat(normalized)
                 if max(normalized(:)) > 1
                     normalized = normalized ./ max(normalized(:));
@@ -34,7 +38,7 @@ classdef NiftiImage
             normalized = cast(normalized, 'uint8');
         end
         function outputView = getOutputView(obj)
-            ownSize = size(obj.Data);
+            ownSize = obj.Header.ImageSize;
             transform = obj.Header.Transform;
             outputView = affineOutputView(ownSize, transform, 'BoundsStyle', 'followOutput');
         end

@@ -7,19 +7,21 @@ classdef ProbabilityMap < handle
         Region siibra.items.Region
         Space siibra.items.Space
         URL
-        Map
-        SparseMap
+        continuousMap
+        labeledMap
         Nifti siibra.items.NiftiImage
         Size
+        Type
     end
     
     methods
-        function obj = ProbabilityMap(region, space, url)
+        function obj = ProbabilityMap(region, space, url, type)
             %UNTITLED Construct an instance of this class
             %   Detailed explanation goes here
             obj.Region = region;
             obj.Space = space;
             obj.URL = url;
+            obj.Type = type;
         end
         function nifti = get.Nifti(obj)
             normalizedRegionName = strrep(obj.Region.Name, " ", "");
@@ -42,13 +44,17 @@ classdef ProbabilityMap < handle
         function size = get.Size(obj)
             size = obj.Nifti.Header.ImageSize;
         end
-        function data = get.Map(obj)
+        function data = getDataRelativeToTemplate(obj)
             template = obj.Space.Template;
             pmapNifti = obj.Nifti;
             data = pmapNifti.getOverlayWarpedRelativeTo(template);
         end
-        function data = get.SparseMap(obj)
-            data = sparse(obj.Map);
+        function data = get.continuousMap(obj)
+            assert(strcmp(obj.Type, "continuous"), "Cannot convert to continuous map!");
+            data = obj.getDataRelativeToTemplate();
+        end
+        function data = get.labeledMap(obj)
+            data = obj.getDataRelativeToTemplate() > 0.0;
         end
     end
 end

@@ -29,5 +29,20 @@ classdef Space < handle
             end
             niftiImage = siibra.items.NiftiImage(cached_path);
         end
+        function viewer = visualize(obj, region)
+            % Combine the probability map of the region with
+            % its corresponding template.
+            
+            pmap = region.probabilityMap(obj.Name);
+            templateImage = obj.Template.getWarpedImage();
+            pmap_overlay = pmap.Map;
+           
+            % to rgb
+            pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));
+            templateRGB = cat(4, templateImage, templateImage, templateImage);
+
+            % mix both layer
+            viewer = orthosliceViewer(pmapRGB .*0.5 + templateRGB);
+        end
     end
 end

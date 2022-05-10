@@ -35,7 +35,7 @@ classdef Space < handle
             
             pmap = region.probabilityMap(obj.Name);
             templateImage = obj.Template.getWarpedImage();
-            pmap_overlay = pmap.Map;
+            pmap_overlay = pmap.getDataRelativeToTemplate();
            
             % to rgb
             pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));

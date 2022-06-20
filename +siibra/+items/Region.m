@@ -71,8 +71,6 @@ classdef Region < handle
                 error("Region has no labeled map");
             end
         end
-    end
-    methods (Access= private)
         function map = parcellationMapForSpace(obj, spaceName)
             found_space = false;
             for i = 1:numel(obj.ParcellationMaps)
@@ -84,7 +82,6 @@ classdef Region < handle
             if ~found_space
                 error("Could not find probability map for this space!");
             end
-        end  
-
-    end  
+        end
+    end
 end

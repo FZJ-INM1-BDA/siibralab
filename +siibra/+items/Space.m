@@ -28,13 +28,13 @@ classdef Space < handle
             end
             niftiImage = siibra.items.NiftiImage(cached_path);
         end
-        function viewer = visualize(obj, parcellationMap)
+        function viewer = visualize(obj, region)
             % Combine the probability map of the region with
             % its corresponding template.
             % TODO pass parcellationMap?
             
             templateImage = obj.loadTemplate().getWarpedImage();
-            pmap_overlay = parcellationMap.getDataRelativeToTemplate();
+            pmap_overlay = region.parcellationMapForSpace(obj.Name).getDataRelativeToTemplate();
            
             % to rgb
             pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));

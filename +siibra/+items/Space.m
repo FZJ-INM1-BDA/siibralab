@@ -7,7 +7,6 @@ classdef Space < handle
         Format (1, 1) string
         VolumeType (1, 1) string
         AtlasId (1, 1) string
-        Template (1, 1) %siibra.items.NiftiImage
     end
     
     methods
@@ -20,7 +19,7 @@ classdef Space < handle
             space.VolumeType = space_json.src_volume_type;
             space.TemplateURL = space_json.links.templates.href;
         end
-        function niftiImage = get.Template(obj)
+        function niftiImage = loadTemplate(obj)
             cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
             if ~isfile(cached_path)
                 options = weboptions;
@@ -32,10 +31,10 @@ classdef Space < handle
         function viewer = visualize(obj, region)
             % Combine the probability map of the region with
             % its corresponding template.
+            % TODO pass parcellationMap?
             
-            pmap = region.probabilityMap(obj.Name);
-            templateImage = obj.Template.getWarpedImage();
-            pmap_overlay = pmap.getDataRelativeToTemplate();
+            templateImage = obj.loadTemplate().getWarpedImage();
+            pmap_overlay = region.parcellationMapForSpace(obj.Name).getDataRelativeToTemplate();
            
             % to rgb
             pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));

@@ -61,21 +61,17 @@ classdef Region < handle
             space = obj.space(space_name);
             pmap = obj.probabilityMap(space.Name);
             template = space.getTemplate();
-
+            templateImage = template.getWarpedImage();
+            pmap_overlay = pmap.getOverlayWarpedRelativeTo(template);
+           
             % to rgb
-            pmapRGB = cat(4, pmap, zeros(size(pmap)), zeros(size(pmap)));
-            templateRGB = cat(4, template, template, template);
-
-            % cutout
-            cutout = min(size(template), size(pmap));
-            pmapRGB = pmapRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
-            templateRGB = templateRGB(1:cutout(1), 1:cutout(2), 1:cutout(3), :);
+            pmapRGB = cat(4, pmap_overlay, zeros(size(pmap_overlay)), zeros(size(pmap_overlay)));
+            templateRGB = cat(4, templateImage, templateImage, templateImage);
 
             % mix both layer
             volume = pmapRGB .*0.5 + templateRGB;
-
         end
-        function pmap = probabilityMap(obj, space_name)
+        function niftiImage = probabilityMap(obj, space_name)
             found_space = false;
             for i = 1:numel(obj.SpaceAndRegionUrl.spaces)
                 if strcmp(obj.SpaceAndRegionUrl.spaces(i).Name, space_name)
@@ -88,7 +84,7 @@ classdef Region < handle
                         fwrite(file_handle, nifti_data);
                         fclose(file_handle);
                     end
-                    pmap = niftiread(cache_path);
+                    niftiImage = siibra.items.NiftiImage(cache_path);
                 end
             end
             if ~found_space

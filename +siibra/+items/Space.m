@@ -19,15 +19,14 @@ classdef Space < handle
             space.VolumeType = space_json.src_volume_type;
             space.TemplateURL = space_json.links.templates.href;
         end
-        function template = getTemplate(obj)
+        function niftiImage = getTemplate(obj)
             cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
             if ~isfile(cached_path)
                 options = weboptions;
                 options.Timeout = 30;
                 websave(cached_path, obj.TemplateURL, options);
             end
-            template = niftiread(cached_path);
-            template = template ./ max(template(:));
+            niftiImage = siibra.items.NiftiImage(cached_path);
         end
     end
 end

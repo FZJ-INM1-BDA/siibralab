@@ -1,22 +1,25 @@
-classdef ContinuousMap < siibra.items.maps.ParcellationMap
+classdef ContinuousMap
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     % kn
     
     properties
+        Region (1, :) siibra.items.Region
+        Space (1, :) siibra.items.Space
+        URL string
     end
     
     methods
         function obj = ContinuousMap(region, space, url)
             %UNTITLED Construct an instance of this class
             %   Detailed explanation goes here
-            obj@siibra.items.maps.ParcellationMap(region, space, url);
+            obj.Region = region;
+            obj.Space = space;
+            obj.URL = url;
+            
         end
-        function nifti = loadNifti(obj)
-            normalizedRegionName = strrep(obj.Region.Name, " ", "");
-            normalizedRegionName = strrep(normalizedRegionName, "/", "-");
-            normalizedSpaceName = strrep(obj.Space.Name, " ", "");
-            cache_path = strcat("+siibra/cache/region_cache/", normalizedRegionName, normalizedSpaceName, ".nii.gz");
+        function nifti = fetch(obj)
+            cache_path = strcat("+siibra/cache/region_cache/", obj.Region.NormalizedName, obj.Space.NormalizedName, ".nii.gz");
             if ~isfile(cache_path)
                 % set higher timeout
                 options = weboptions;
@@ -31,12 +34,12 @@ classdef ContinuousMap < siibra.items.maps.ParcellationMap
         end
 
         function size = mapSize(obj)
-            nifti = obj.loadNifti();
+            nifti = obj.fetch();
             size = nifti.Header.ImageSize;
         end
         function data = getDataRelativeToTemplate(obj)
             template = obj.Space.loadTemplate;
-            pmapNifti = obj.loadNifti();
+            pmapNifti = obj.fetch();
             data = pmapNifti.getOverlayWarpedRelativeTo(template);
         end
     end

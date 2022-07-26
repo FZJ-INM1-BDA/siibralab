@@ -7,7 +7,6 @@ classdef Parcellation < handle
         Desciption (1, 1) string
         RegionTree (1, 1) digraph
         Spaces (1, :) siibra.items.Space
-        ParcellationMaps (1, :) siibra.items.maps.ParcellationMap
     end
 
     methods
@@ -38,18 +37,12 @@ classdef Parcellation < handle
             
             % store graph
             parcellation.RegionTree = siibra.items.Parcellation.createParcellationTree(parcellation, regions);
-            
-            % create parcellation maps
-            parcellation.ParcellationMaps = siibra.items.maps.ParcellationMap.empty;
-            for idx = 1:numel(parcellation.Spaces)
-                parcellation.ParcellationMaps(end + 1) = siibra.items.maps.ParcellationMap(atlas, parcellation, parcellation.Spaces(idx));
-            end
         end
 
         function map = parcellationMap(obj, spaceName)
-            for idx = 1:numel(obj.ParcellationMaps)
-                if obj.ParcellationMaps(idx).Space.Name == spaceName
-                    map = obj.ParcellationMaps(idx);
+            for idx = 1:numel(obj.Spaces)
+                if obj.Spaces(idx).Name == spaceName
+                    map = siibra.items.maps.ParcellationMap(obj, obj.Spaces(idx));
                 end
             end
         end
@@ -89,7 +82,7 @@ classdef Parcellation < handle
             % append root node
             nodes = target;
             nodes(length(nodes) + 1) = root.name;
-            region(length(region) + 1) = siibra.items.Region(root.name, parcellation, 0, []);
+            region(length(region) + 1) = siibra.items.Region(root.name, parcellation, []);
             % make nodes unique
             [unique_nodes, unique_indices, ~] = unique(nodes);
             nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
@@ -106,7 +99,7 @@ classdef Parcellation < handle
                 child = root.children(child_num);
                 source(length(source) + 1) = root.name;
                 target(length(target) + 1) = child.name;
-                regions(length(regions) + 1) = siibra.items.Region(child.name, parcellation, child.labelIndex, child.x_dataset_specs);
+                regions(length(regions) + 1) = siibra.items.Region(child.name, parcellation, child.x_dataset_specs);
                 [source, target, regions] = siibra.items.Parcellation.traverseTree(parcellation, child, source, target, regions);
             end
         end

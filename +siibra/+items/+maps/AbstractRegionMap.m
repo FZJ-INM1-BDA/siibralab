@@ -1,4 +1,4 @@
-classdef ContinuousMap
+classdef (Abstract) AbstractRegionMap < matlab.mixin.Heterogeneous & handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     % kn
@@ -6,31 +6,34 @@ classdef ContinuousMap
     properties
         Region (1, :) siibra.items.Region
         Space (1, :) siibra.items.Space
+
+    end
+    properties (Abstract)
         URL string
+        CachePath string
     end
     
     methods
-        function obj = ContinuousMap(region, space, url)
+        function obj = AbstractRegionMap(region, space)
             %UNTITLED Construct an instance of this class
             %   Detailed explanation goes here
             obj.Region = region;
             obj.Space = space;
-            obj.URL = url;
             
         end
+
         function nifti = fetch(obj)
-            cache_path = strcat("+siibra/cache/region_cache/", obj.Region.NormalizedName, obj.Space.NormalizedName, ".nii.gz");
-            if ~isfile(cache_path)
+            if ~isfile(obj.CachePath)
                 % set higher timeout
                 options = weboptions;
                 options.Timeout = 30;
-                nifti_data = webread(obj.URL);
-                file_handle = fopen(cache_path, "w");
-                assert(file_handle > 0, "invalid file handle for cached file " + cache_path);
+                nifti_data = webread(siibra.internal.API.absoluteLink(obj.URL));
+                file_handle = fopen(obj.CachePath, "w");
+                assert(file_handle > 0, "invalid file handle for cached file " + obj.CachePath);
                 fwrite(file_handle, nifti_data);
                 fclose(file_handle);
             end
-            nifti = siibra.items.NiftiImage(cache_path);
+            nifti = siibra.items.NiftiImage(obj.CachePath);
         end
 
         function size = mapSize(obj)

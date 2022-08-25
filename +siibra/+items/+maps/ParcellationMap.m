@@ -21,7 +21,7 @@ classdef ParcellationMap < handle
         end
         
         function cachePath = get.CachePath(obj)
-            cachePath = strcat("+siibra/cache/parcellation_maps/", obj.Parcellation.Name, "_", obj.Space.Name);
+            cachePath = fullfile("+siibra", "cache", "parcellation_maps", strcat(obj.Parcellation.Name, "_", obj.Space.Name));
         end
 
         function nifti = fetch(obj)
@@ -32,7 +32,7 @@ classdef ParcellationMap < handle
                 unzip(obj.CachePath + ".zip", obj.CachePath)
             end
             files = dir(obj.CachePath + "/*.nii.gz");
-            nifti = arrayfun(@(file) siibra.items.NiftiImage(obj.CachePath + "/" + file.name), files);
+            nifti = arrayfun(@(file) siibra.items.NiftiImage(fullfile(obj.CachePath, file.name)), files);
         end
     end
 end

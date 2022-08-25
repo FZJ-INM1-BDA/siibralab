@@ -19,7 +19,7 @@ classdef ContinuousRegionMap < siibra.items.maps.AbstractRegionMap
                     "/regions/", obj.Region.Name, "/regional_map/map?space_id=", obj.Space.Id);
         end
         function cachePath = get.CachePath(obj)
-            cachePath = strcat("+siibra/cache/region_cache/", obj.Region.NormalizedName, obj.Space.NormalizedName, "_continuous.nii.gz");
+            cachePath = fullfile("+siibra", "cache", "region_cache", strcat(obj.Region.NormalizedName, obj.Space.NormalizedName, "_continuous.nii.gz"));
         end
     end
 end

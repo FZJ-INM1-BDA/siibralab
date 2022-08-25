@@ -24,7 +24,7 @@ classdef Space < handle
             normalizedName = strrep(obj.Name, " ", "");
         end
         function niftiImage = loadTemplate(obj)
-            cached_path = strcat("+siibra/cache/template_cache/", obj.Name, ".nii");
+            cached_path = fullfile("+siibra", "cache", "template_cache", strcat(obj.Name, ".nii"));
             if ~isfile(cached_path)
                 options = weboptions;
                 options.Timeout = 30;

@@ -31,7 +31,7 @@ classdef LabelledRegionMap < siibra.items.maps.AbstractRegionMap
             
         end
         function cachePath = get.CachePath(obj)
-            cachePath = strcat("+siibra/cache/region_cache/", obj.Region.NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz");
+            cachePath = fullfile("+siibra", "cache", "region_cache", strcat(obj.Region.NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz"));
         end
     end
         

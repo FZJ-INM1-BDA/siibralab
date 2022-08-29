@@ -6,6 +6,7 @@ classdef Region < handle
         Spaces (1, :) siibra.items.Space
         Parent (1, 1) % Region
         Children (1, :) % Region
+        IsLeaf logical
     end
     methods
         function region = Region(name, parcellation, dataset_specs)
@@ -48,9 +49,26 @@ classdef Region < handle
         function parent = get.Parent(obj)
             parent = obj.Parcellation.getParentRegion(obj.Name);
         end
+        function isLeaf = get.IsLeaf(obj)
+            isLeaf = isempty(obj.Children);
+        end
+        function mask = getMask(obj, spaceName)
+            childNames = dfsearch(obj.Parcellation.RegionTree, obj.Name);
+            childIds =  arrayfun(@(name) findnode(obj.Parcellation.RegionTree, name), childNames);
+            childRegions = obj.Parcellation.RegionTree.Nodes.Region(childIds);
+            childLeafRegions = childRegions([childRegions.IsLeaf]);
+            mask = siibra.items.maps.LabelledRegionMap(obj.NormalizedName, childLeafRegions, obj.space(spaceName));
+        end
+
         function map = continuousMap(obj, spaceName)
             space = obj.space(spaceName);
-            map = siibra.items.maps.ContinuousRegionMap(obj, space);
+            if obj.IsLeaf
+                map = siibra.items.maps.ContinuousRegionMap(obj, space);
+            else
+                
+
+            end
+            
         end
         function mask = labelledMap(obj, spaceName)
             space = obj.space(spaceName);

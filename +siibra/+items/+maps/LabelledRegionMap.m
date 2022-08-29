@@ -10,6 +10,7 @@ classdef LabelledRegionMap < handle
         LabelIndices (1,:) uint32 {mustBeFinite}
     end
     
+    
     methods
         function obj = LabelledRegionMap(name, regions, space)
             obj.Name = name; 
@@ -27,7 +28,7 @@ classdef LabelledRegionMap < handle
                 "/regions/", obj.Regions(regionIndex).Name, "/regional_map/", endpoint, "?space_id=", obj.Space.Id, "&map_type=LABELLED");
         end
         function cachePath = maskCachePath(obj, compressed)
-            cachePath = strcat("+siibra/cache/region_cache/", obj.Name, obj.Space.NormalizedName, "_mask.nii");
+            cachePath = fullfile("+siibra/cache/region_cache/", strcat(obj.Name, obj.Space.NormalizedName, "_mask.nii"));
             if compressed
                 cachePath = strcat(cachePath, ".gz");
             end
@@ -59,20 +60,14 @@ classdef LabelledRegionMap < handle
                     end
 
                   regionNiftis(regionIndex) = siibra.items.NiftiImage(obj.regionsCachePath(regionIndex));  
-                  % assert that every region is in the same hemisphere and
-                  % the niftis share the same affine matrix
+                  % assert that the niftis share the same affine matrix
                   assert(isequal(regionNiftis(regionIndex).Header.Transform, regionNiftis(1).Header.Transform), "Regions do not share the same transform!")
                 end
                 % create combined mask
-                niftisAndLabelIndices.nifti = regionNiftis;
-                niftisAndLabelIndices.labelIndex = obj.LabelIndices;
-                maskData = arrayfun(@(niftiAndLabelIndex) niftiAndLabelIndex.nifti.loadData() == niftiAndLabelIndex.labelIndex, niftisAndLabelIndices, 'UniformOutput',false);
-                % or data
-                if false
-                    combinedMaskData = any(cell2mat(maskData), 1);
-                else
-                    combinedMaskData = cell2mat(maskData);
-                end
+                maskData = arrayfun(@(i) regionNiftis(i).loadData() == obj.LabelIndices(i), 1:numel(regionNiftis), 'UniformOutput',false);
+                maskData = reshape(maskData, 1, 1, 1, []);
+                
+                combinedMaskData = any(cell2mat(maskData), 4);
                 header = regionNiftis(1).Header;
                 header.Datatype = "uint8";
                 niftiwrite(cast(combinedMaskData, "uint8"), obj.maskCachePath(false), header, 'Compressed',true)

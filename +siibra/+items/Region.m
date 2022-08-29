@@ -79,14 +79,8 @@ classdef Region < handle
             if obj.IsLeaf
                 map = siibra.items.maps.ContinuousRegionMap(obj, space);
             else
-                
-
-            end
-            
-        end
-        function mask = labelledMap(obj, spaceName)
-            space = obj.matchAgainstSpacesParcellationSupports(spaceName);
-            mask = siibra.items.maps.LabelledRegionMap(obj, space);
+                error("continuous maps are supported on leafs only!");
+            end 
         end
     end
 end

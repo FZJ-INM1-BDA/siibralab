@@ -13,15 +13,7 @@ end
     lowerQuery = lower(query);
     lowerHaystack = lower(haystack);
 
-    if isempty(pyenv().Version)
-        % no python available
-        matchedIndices = find(contains(lowerHaystack, lowerQuery));
-        if isempty(matchedIndices)
-            error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
-        end
-        matchedIndex = matchedIndices(1);
-            
-    else
+    if any(strcmp(pyenv().Version, ["3.8", "3.9"]))
         difflib = py.importlib.import_module('difflib');
 
         python_matched_names = difflib.get_close_matches(lowerQuery, cellstr(lowerHaystack), py.int(1), 0.3);
@@ -30,7 +22,14 @@ end
             error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
         end
         matchedIndex = find(ismember(lowerHaystack, matched_names{1}));
-
+            
+    else
+        % no python available
+        matchedIndices = find(contains(lowerHaystack, lowerQuery));
+        if isempty(matchedIndices)
+            error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
+        end
+        matchedIndex = matchedIndices(1);
     end
     
 end

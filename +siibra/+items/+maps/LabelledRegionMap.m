@@ -28,10 +28,11 @@ classdef LabelledRegionMap < handle
                 "/regions/", obj.Regions(regionIndex).Name, "/regional_map/", endpoint, "?space_id=", obj.Space.Id, "&map_type=LABELLED");
         end
         function cachePath = maskCachePath(obj, compressed)
-            cachePath = fullfile("+siibra/cache/region_cache/", strcat(obj.Name, obj.Space.NormalizedName, "_mask.nii"));
+            filename = strcat(obj.Name, obj.Space.NormalizedName, "_mask.nii");
             if compressed
-                cachePath = strcat(cachePath, ".gz");
+                filename = strcat(filename, ".gz");
             end
+            cachePath = siibra.internal.cache(filename, "region_cache");
         end
         function url = regionUrl(obj, regionIndex)
             url = obj.infoOrMapURL(false, regionIndex);
@@ -39,7 +40,8 @@ classdef LabelledRegionMap < handle
         end
 
         function cachePath = regionsCachePath(obj, regionIndex)
-            cachePath = fullfile("+siibra/cache/region_cache/", strcat(obj.Regions(regionIndex).NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz"));
+            filename = strcat(obj.Regions(regionIndex).NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz");
+            cachePath = siibra.internal.cache(filename, "region_cache");
         end
         
         function labelIndices = get.LabelIndices(obj)

@@ -21,7 +21,7 @@ classdef ParcellationMap < handle
         end
         
         function cachePath = get.CachePath(obj)
-            cachePath = fullfile("+siibra", "cache", "parcellation_maps", strcat(obj.Parcellation.Name, "_", obj.Space.Name));
+            cachePath = siibra.internal.cache(strcat(obj.Parcellation.Name, "_", obj.Space.Name), "parcellation_maps");
         end
 
         function nifti = fetch(obj)

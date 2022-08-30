@@ -2,7 +2,8 @@ function atlases = initAtlases(clear_cache)
 arguments
     clear_cache (1, 1) logical
 end
-    cached_file_name = fullfile('+siibra', 'cache','atlases.mat');
+    
+    cached_file_name = siibra.internal.cache("atlases.mat");
     if clear_cache || ~isfile(cached_file_name)
         options = weboptions;
         options.Timeout = 30;

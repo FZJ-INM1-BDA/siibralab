@@ -1,19 +1,18 @@
 classdef Region < handle
     properties
         Name string
+        NormalizedName string
         Parcellation (1, :) siibra.items.Parcellation
-        ParcellationMaps (1, :) siibra.items.maps.ParcellationMap
         Spaces (1, :) siibra.items.Space
         Parent (1, 1) % Region
         Children (1, :) % Region
+        IsLeaf logical
     end
     methods
         function region = Region(name, parcellation, dataset_specs)
             region.Name = name;
             region.Parcellation = parcellation;
-
-            parcellationMaps = siibra.items.maps.ParcellationMap.empty;
-
+            spaces = siibra.items.Space.empty;
             % parse dataset_specs for this region
             if ~isempty(dataset_specs)
                 for i = 1:numel(dataset_specs)
@@ -26,32 +25,26 @@ classdef Region < handle
                         for spaceIndex = 1:numel(parcellation.Spaces)
                              space = parcellation.Spaces(spaceIndex);
                              if specs.space_id == space.Id
-                                parcellationMaps(end +1) = siibra.items.maps.mapFactory( ...
-                                region, ...
-                                space, ...
-                                specs.url, ...
-                                specs.map_type ...
-                                );
+                                spaces(end + 1) = space;
+                                
                              end
                         end
                     end
                 end
             end
-
-            region.ParcellationMaps = parcellationMaps;
+            region.Spaces = spaces;
         end
-
-        function spaces = get.Spaces(obj)
-            if isempty(obj.ParcellationMaps)
-                spaces = siibra.items.Space.empty;
-            else
-                spaces = [obj.ParcellationMaps.Space];
-            end
+        function normalizedRegionName = get.NormalizedName(obj)
+            normalizedRegionName = strrep(obj.Name, " ", "");
+            normalizedRegionName = strrep(normalizedRegionName, "/", "-");
         end
-        function space = space(obj, spaceName)
-            spaceNames = {obj.Spaces.Name};
+        function space = matchAgainstSpacesParcellationSupports(obj, spaceName)
+            spaceNames = {obj.Parcellation.Spaces.Name};
             spaceIndex = siibra.internal.fuzzyMatching(spaceName, spaceNames);
-            space = obj.ParcellationMaps(spaceIndex).Space;
+            space = obj.Parcellation.Spaces(spaceIndex);
+        end
+        function support = doesRegionSupportSpace(obj, space)
+            support = any(strcmp([obj.Spaces.Id], space.Id));
         end
         function children = get.Children(obj)
             children = obj.Parcellation.getChildRegions(obj.Name);
@@ -59,29 +52,35 @@ classdef Region < handle
         function parent = get.Parent(obj)
             parent = obj.Parcellation.getParentRegion(obj.Name);
         end
-        function map = continuousMap(obj, spaceName)
-            map = obj.parcellationMapForSpace(spaceName);
-            if ~isa(map, 'siibra.items.maps.ContinuousMap')
-                error("Region has no continuous map");
-            end
+        function isLeaf = get.IsLeaf(obj)
+            isLeaf = isempty(obj.Children);
         end
-        function map = labeledMap(obj, spaceName)
-            map = obj.parcellationMapForSpace(spaceName);
-            if ~isa(map, 'siibra.items.maps.LabeledMap')
-                error("Region has no labeled map");
-            end
-        end
-        function map = parcellationMapForSpace(obj, spaceName)
-            found_space = false;
-            for i = 1:numel(obj.ParcellationMaps)
-                if strcmp(obj.ParcellationMaps(i).Space.Name, spaceName)
-                    found_space = true;
-                    map = obj.ParcellationMaps(i);
+        function mask = getMask(obj, spaceName)
+            % Perform Breadth-first search
+            % when node supports space, add to list of regions to join
+            % when node does not support space check its children
+            space = obj.matchAgainstSpacesParcellationSupports(spaceName);
+            regions = obj;
+            regionsThatSupportRequestedSpace = siibra.items.Region.empty;
+            while ~isempty(regions)
+                region = regions(1);
+                regions = regions(2:end);
+                if region.doesRegionSupportSpace(space)
+                    regionsThatSupportRequestedSpace(end + 1) = region;
+                else
+                    regions = [regions, region.Children.'];
                 end
             end
-            if ~found_space
-                error("Could not find probability map for this space!");
-            end
+            mask = siibra.items.maps.LabelledRegionMap(obj.NormalizedName, regionsThatSupportRequestedSpace, space);
+        end
+
+        function map = continuousMap(obj, spaceName)
+            space = obj.matchAgainstSpacesParcellationSupports(spaceName);
+            if obj.IsLeaf
+                map = siibra.items.maps.ContinuousRegionMap(obj, space);
+            else
+                error("continuous maps are supported on leafs only!");
+            end 
         end
     end
 end

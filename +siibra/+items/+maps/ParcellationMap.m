@@ -17,7 +17,7 @@ classdef ParcellationMap < handle
 
         function url = get.URL(obj)
             % /atlases/{atlas_id}/spaces/{space_id}/parcellation_maps?parcellation_id={parcellation_id}
-            url = strcat("atlases/", obj.Parcellation.Atlas.Id, "/spaces/", obj.Space.Id, "/parcellation_maps?parcellation_id=", obj.Parcellation.Id);
+            url = siibra.internal.API.absoluteLink(strcat("atlases/", obj.Parcellation.Atlas.Id, "/spaces/", obj.Space.Id, "/parcellation_maps?parcellation_id=", obj.Parcellation.Id));
         end
         
         function cachePath = get.CachePath(obj)

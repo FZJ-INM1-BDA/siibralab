@@ -1,5 +1,5 @@
 function atlases = viewAtlases()
-%ATLASES List all available atlas nams   Detailed explanation goes here
+% List all available atlases
     atlases = siibra.internal.initAtlases(false);
 end
 

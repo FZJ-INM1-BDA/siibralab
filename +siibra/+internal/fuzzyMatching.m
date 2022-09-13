@@ -4,8 +4,7 @@ arguments
     haystack (1, :) string
 end
 
-%FUZZY_MATCHING Summary of this function goes here
-%   Detailed explanation goes here
+%FUZZY_MATCHING returns index into the haystack or raises Exception
     % If python is available use difflib to rank values in haystack based
     % on similarity. If python is not available check if the query is a
     % substring and return the first elementIndex for which this is true.

@@ -1,4 +1,5 @@
 classdef Region < handle
+    %REGION A region is a node in the RegionTree of the parcellation.
     properties
         Name string
         NormalizedName string

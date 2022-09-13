@@ -1,7 +1,8 @@
 classdef LabelledRegionMap < handle
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    % kn
+    %LabelledRegionMap The LabelledRegionMap combines possibly multiple
+    %regions the space and the label indices for each region.
+    %   Based on this information the LabelledRegionMap creates a nifi
+    %   containing the combined mask of all regions.
     
     properties
         Name string
@@ -9,23 +10,11 @@ classdef LabelledRegionMap < handle
         Space (1, :) siibra.items.Space
         LabelIndices (1,:) uint32 {mustBeFinite}
     end
-    
-    
     methods
         function obj = LabelledRegionMap(name, regions, space)
             obj.Name = name; 
             obj.Regions = regions;
             obj.Space = space;
-        end
-        function url = infoOrMapURL(obj, isInfo, regionIndex)
-            if isInfo
-                endpoint = "info";
-            else
-                endpoint = "map";
-            end
-            % /atlases/{atlas_id}/parcellations/{parcellation_id}/regions/{region_id}/regional_map/info?space_id={space_id}&map_type=LABELLED
-            url = strcat("atlases/", obj.Regions(regionIndex).Parcellation.Atlas.Id, "/parcellations/", obj.Regions(regionIndex).Parcellation.Id,...
-                "/regions/", obj.Regions(regionIndex).Name, "/regional_map/", endpoint, "?space_id=", obj.Space.Id, "&map_type=LABELLED");
         end
         function cachePath = maskCachePath(obj, compressed)
             filename = strcat(obj.Name, obj.Space.NormalizedName, "_mask.nii");
@@ -34,10 +23,6 @@ classdef LabelledRegionMap < handle
             end
             cachePath = siibra.internal.cache(filename, "region_cache");
         end
-        function url = regionUrl(obj, regionIndex)
-            url = obj.infoOrMapURL(false, regionIndex);
-            
-        end
 
         function cachePath = regionsCachePath(obj, regionIndex)
             filename = strcat(obj.Regions(regionIndex).NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz");
@@ -45,22 +30,36 @@ classdef LabelledRegionMap < handle
         end
         
         function labelIndices = get.LabelIndices(obj)
-            labelIndices = arrayfun(@(i) webread(siibra.internal.API.absoluteLink(obj.infoOrMapURL(true, i))).label, 1:numel(obj.Regions));
+
+            labelIndices = arrayfun(@(i) ...
+                siibra.internal.API.doWebreadWithLongTimeout(...
+                    siibra.internal.API.regionMap(...
+                    obj.Regions(i).Parcellation.Atlas.Id,...
+                    obj.Regions(i).Parcellation.Id,...
+                    obj.Regions(i).Name,...
+                    obj.Space.Id,...
+                    "info",...
+                    "LABELLED") ...
+                ), ...
+                1:numel(obj.Regions));
         end
 
         function nifti = fetch(obj)
-            % first try mask cache
             if ~isfile(obj.maskCachePath(true))
                 regionNiftis = siibra.items.NiftiImage.empty([0, numel(obj.Regions)]);
                 for regionIndex = 1:numel(obj.Regions)
                     if ~isfile(obj.regionsCachePath(regionIndex))
-                        nifti_data = webread(siibra.internal.API.absoluteLink(obj.regionUrl(regionIndex)));
-                        file_handle = fopen(obj.regionsCachePath(regionIndex), "w");
-                        assert(file_handle > 0, "invalid file handle for cached file " + obj.regionsCachePath(regionIndex));
-                        fwrite(file_handle, nifti_data);
-                        fclose(file_handle);
+                        siibra.internal.API.doWebsaveWithLongTimeout( ...
+                            obj.regionsCachePath(regionIndex), ...
+                            siibra.internal.API.regionMap( ...
+                                obj.Regions(regionIndex).Parcellation.Atlas.Id,...
+                                obj.Regions(regionIndex).Parcellation.Id,...
+                                obj.Regions(regionIndex).Name,...
+                                obj.Space.Id,...
+                                "map",...
+                                "LABELLED") ...
+                            )
                     end
-
                   regionNiftis(regionIndex) = siibra.items.NiftiImage(obj.regionsCachePath(regionIndex));  
                   % assert that the niftis share the same affine matrix
                   assert(isequal(regionNiftis(regionIndex).Header.Transform, regionNiftis(1).Header.Transform), "Regions do not share the same transform!")

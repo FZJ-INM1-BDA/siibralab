@@ -1,4 +1,7 @@
 classdef Parcellation < handle
+    %PARCELLATION The parcellation belongs to a certain atlas and holds the
+    %RegionTree and the available spaces.
+    
     properties
         Id (1, 1) string
         Name (1, 1) string
@@ -16,6 +19,7 @@ classdef Parcellation < handle
             parcellation.Atlas = atlas;
             parcellation.Modality = parcellation_json.modality;
 
+            % some parcellations do have a description
             if ~ isempty(parcellation_json.infos)
                 parcellation.Desciption = parcellation_json.infos(1).description;
             end

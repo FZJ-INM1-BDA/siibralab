@@ -7,7 +7,7 @@ classdef Parcellation < handle
         Name (1, 1) string
         Atlas (1, :) siibra.items.Atlas
         Modality % no consistent type yet
-        Desciption (1, 1) string
+        Description (1, 1) string
         RegionTree (1, 1) digraph
         Spaces (1, :) siibra.items.Space
     end
@@ -21,7 +21,7 @@ classdef Parcellation < handle
 
             % some parcellations do have a description
             if ~ isempty(parcellation_json.infos)
-                parcellation.Desciption = parcellation_json.infos(1).description;
+                parcellation.Description = parcellation_json.infos(1).description;
             end
 
             % link spaces from atlas
@@ -55,9 +55,8 @@ classdef Parcellation < handle
             region_names = obj.RegionTree.Nodes(contains(obj.RegionTree.Nodes.Name, region_name_query), 1);
         end
         function region = decodeRegion(obj, region_name_query)
-            region_table = obj.findRegion(region_name_query);
-            assert(height(region_table) == 1, "query was not unambiguous!")
-            region = region_table.Region(1);
+            index = siibra.internal.fuzzyMatching(region_name_query, [obj.RegionTree.Nodes.Name]);
+            region = obj.RegionTree.Nodes.Region(index);
         end
         function region = getRegion(obj, region_name_query)
             nodeId = obj.RegionTree.findnode(region_name_query);

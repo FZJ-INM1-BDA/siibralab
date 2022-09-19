@@ -14,14 +14,12 @@ end
 
     if any(strcmp(pyenv().Version, ["3.8", "3.9"]))
         difflib = py.importlib.import_module('difflib');
-
-        python_matched_names = difflib.get_close_matches(lowerQuery, cellstr(lowerHaystack), py.int(1), 0.3);
-        matched_names = cellfun(@string,cell(python_matched_names),'UniformOutput',false);
-        if isempty(matched_names)
-            error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
+        matcher = arrayfun(@(hay) difflib.SequenceMatcher(a=lowerQuery, b=hay), lowerHaystack, 'UniformOutput', false);
+        ratios = cellfun(@(m) m.ratio(), matcher);
+        [maxRatio, matchedIndex] = max(ratios);
+        if maxRatio < 0.3
+            error (strcat("Empty result for query ", query, ".  Closest match: ", haystack(matchedIndex)));
         end
-        matchedIndex = find(ismember(lowerHaystack, matched_names{1}));
-            
     else
         % no python available
         matchedIndices = find(contains(lowerHaystack, lowerQuery));

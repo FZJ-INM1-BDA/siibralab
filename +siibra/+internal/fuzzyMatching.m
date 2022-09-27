@@ -22,7 +22,13 @@ end
         end
     else
         % no python available
-        matchedIndices = find(contains(lowerHaystack, lowerQuery));
+        % build pattern
+        words = split(lowerQuery, " ");
+        pattern = wildcardPattern;
+        for wordIndex = 1:numel(words)
+            pattern = pattern + words(wordIndex) + wildcardPattern;
+        end
+        matchedIndices = find(contains(lowerHaystack, pattern));
         if isempty(matchedIndices)
             error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
         end

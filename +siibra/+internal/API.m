@@ -3,11 +3,15 @@ classdef API
     
     properties (Constant=true)
         Endpoint = "https://siibra-api-stable.apps.hbp.eu/v1_0/"
+        EndpointV2 = "https://siibra-api-latest.apps-dev.hbp.eu/v2_0"
     end
 
     methods (Static)
         function link = absoluteLink(relativeLink)
             link = siibra.internal.API.Endpoint + relativeLink;
+        end
+        function link = absoluteLinkV2(relativeLink)
+            link = siibra.internal.API.EndpointV2 + relativeLink;
         end
         function result = doWebreadWithLongTimeout(absoluteLink)
             options = weboptions;
@@ -57,6 +61,48 @@ classdef API
                 "/parcellation_maps?parcellation_id=", parcellationId);
             absoluteLink = siibra.internal.API.absoluteLink(relativeLink); 
         end
+        function absoluteLink = featuresPageForParcellation(atlasId, parcellationId, page, size)
+            relativeLink = "/atlases/" + atlasId + ...
+                            "/parcellations/" + parcellationId + ...
+                            "/features?page=" + page + ...
+                            "&size=" + size;
+            absoluteLink = siibra.internal.API.absoluteLinkV2(relativeLink);
+        end
+        function featureList = featuresForParcellation(atlasId, parcellationId)
+            featureList = {};
+            page = 1;
+            size = 100;
+            firstPage = siibra.internal.API.doWebreadWithLongTimeout( ...
+                siibra.internal.API.featuresPageForParcellation( ...
+                atlasId, ...
+                parcellationId, ...
+                page, ...
+                size)...
+            );
+            totalElements = firstPage.total;
+            featureList{1} = firstPage.items;
+            processedElements = numel(firstPage.items);
+            while processedElements < totalElements
+                page = page + 1;
+                nextPage = siibra.internal.API.doWebreadWithLongTimeout( ...
+                    siibra.internal.API.featuresPageForParcellation( ...
+                        atlasId, ...
+                        parcellationId, ...
+                        page, ...
+                        size)...
+                );
+                featureList{page} = nextPage.items;
+                processedElements = processedElements + numel(nextPage.items);
+            end
+            featureList = cat(1, featureList{:});
+        end
+        function absoluteLink = parcellationFeature(atlasId, parcellationId, featureId)
+            relativeLink = "/atlases/" + atlasId + ...
+                            "/parcellations/" + parcellationId + ...
+                            "/features/" + featureId;
+            absoluteLink = siibra.internal.API.absoluteLinkV2(relativeLink);
+        end
+
     end
     
 end

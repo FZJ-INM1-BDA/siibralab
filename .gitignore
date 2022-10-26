@@ -1,4 +1,4 @@
 *.DS_Store
 *.asv
 screen-shots/
-+siibra/cache/atlases.mat
++siibra/cache/

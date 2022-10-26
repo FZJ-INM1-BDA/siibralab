@@ -13,7 +13,7 @@ classdef Atlas < handle
 
             % Spaces
             spaces_json = webread(atlas_json.links.spaces.href);
-            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Id), spaces_json);
+            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Name), spaces_json);
 
             % Parcellations
             parcellations_json = webread(atlas_json.links.parcellations.href);

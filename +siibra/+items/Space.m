@@ -7,12 +7,12 @@ classdef Space < handle
         TemplateURL (1, 1) string
         Format (1, 1) string
         VolumeType (1, 1) string
-        AtlasId (1, 1) string
+        AtlasName(1, 1) string
     end
     
     methods
-        function space = Space(atlas_space_reference_json, atlas_id)
-            space.AtlasId = atlas_id;
+        function space = Space(atlas_space_reference_json, atlasName)
+            space.AtlasName = atlasName;
             space_json = webread(atlas_space_reference_json.links.self.href);
             space.Id = space_json.id;
             space.Name = space_json.name;

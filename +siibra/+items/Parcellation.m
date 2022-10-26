@@ -6,7 +6,7 @@ classdef Parcellation < handle
         Id (1, 1) string
         Name (1, 1) string
         Atlas (1, :) siibra.items.Atlas
-        Modality % no consistent type yet
+        Modality (1, 1) string
         Description (1, 1) string
         RegionTree (1, 1) digraph
         Spaces (1, :) siibra.items.Space
@@ -17,7 +17,12 @@ classdef Parcellation < handle
             parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
             parcellation.Name = parcellation_json.name;
             parcellation.Atlas = atlas;
-            parcellation.Modality = parcellation_json.modality;
+            
+            if isempty(parcellation_json.modality)
+                parcellation.Modality = "";
+            else
+                parcellation.Modality = parcellation_json.modality;
+            end
 
             % some parcellations do have a description
             if ~ isempty(parcellation_json.infos)

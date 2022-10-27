@@ -47,7 +47,7 @@ classdef ContinuousRegionMap < handle
         end
         
         function cachePath = get.CachePath(obj)
-            filename = strcat(obj.Region.NormalizedName, obj.Space.NormalizedName, "_continuous.nii.gz");
+            filename = obj.Region.NormalizedName + obj.Space.NormalizedName + "_continuous.nii.gz";
             cachePath = siibra.internal.cache(filename, "region_cache");
         end
         function nifti = fetch(obj)

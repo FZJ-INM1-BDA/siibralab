@@ -24,16 +24,16 @@ classdef ContinuousRegionMap < handle
                     obj.Space.Id ...
                     ) ...
                 );
-            dataset_specs = regionMapInfoJson.x_dataset_specs;
-            if ~iscell(dataset_specs)
-                dataset_specs = num2cell(dataset_specs);
+            datasetSpecs = regionMapInfoJson.x_dataset_specs;
+            if ~iscell(datasetSpecs)
+                datasetSpecs = num2cell(datasetSpecs);
             end
             datasetIndex = find( ...
                 cell2mat( ...
                 cellfun( ...
                 @(dataset) ...
                 isequal(dataset.x_type, 'minds/core/dataset/v1.0.0'), ...
-                dataset_specs, ...
+                datasetSpecs, ...
                 'UniformOutput', false)));
             if isempty(datasetIndex)
                 obj.Name = "Not available";
@@ -47,7 +47,7 @@ classdef ContinuousRegionMap < handle
         end
         
         function cachePath = get.CachePath(obj)
-            filename = strcat(obj.Region.NormalizedName, obj.Space.NormalizedName, "_continuous.nii.gz");
+            filename = obj.Region.NormalizedName + obj.Space.NormalizedName + "_continuous.nii.gz";
             cachePath = siibra.internal.cache(filename, "region_cache");
         end
         function nifti = fetch(obj)

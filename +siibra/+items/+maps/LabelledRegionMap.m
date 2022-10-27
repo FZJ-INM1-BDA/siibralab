@@ -17,15 +17,15 @@ classdef LabelledRegionMap < handle
             obj.Space = space;
         end
         function cachePath = maskCachePath(obj, compressed)
-            filename = strcat(obj.Name, obj.Space.NormalizedName, "_mask.nii");
+            filename = obj.Name + obj.Space.NormalizedName + "_mask.nii";
             if compressed
-                filename = strcat(filename, ".gz");
+                filename = filename + ".gz";
             end
             cachePath = siibra.internal.cache(filename, "region_cache");
         end
 
         function cachePath = regionsCachePath(obj, regionIndex)
-            filename = strcat(obj.Regions(regionIndex).NormalizedName, obj.Space.NormalizedName, "_labelled.nii.gz");
+            filename = obj.Regions(regionIndex).NormalizedName + obj.Space.NormalizedName + "_labelled.nii.gz";
             cachePath = siibra.internal.cache(filename, "region_cache");
         end
         

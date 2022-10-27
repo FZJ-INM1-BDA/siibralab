@@ -6,38 +6,43 @@ classdef Parcellation < handle
         Id (1, 1) string
         Name (1, 1) string
         Atlas (1, :) siibra.items.Atlas
-        Modality % no consistent type yet
+        Modality (1, 1) string
         Description (1, 1) string
         RegionTree (1, 1) digraph
         Spaces (1, :) siibra.items.Space
     end
 
     methods
-        function parcellation = Parcellation(parcellation_json, atlas)
-            parcellation.Id = strcat(parcellation_json.id.kg.kgSchema, '/', parcellation_json.id.kg.kgId);
-            parcellation.Name = parcellation_json.name;
+        function parcellation = Parcellation(parcellationJson, atlas)
+            parcellation.Id = strcat(parcellationJson.id.kg.kgSchema, '/', parcellationJson.id.kg.kgId);
+            parcellation.Name = parcellationJson.name;
             parcellation.Atlas = atlas;
-            parcellation.Modality = parcellation_json.modality;
+            
+            if isempty(parcellationJson.modality)
+                parcellation.Modality = "";
+            else
+                parcellation.Modality = parcellationJson.modality;
+            end
 
             % some parcellations do have a description
-            if ~ isempty(parcellation_json.infos)
-                parcellation.Description = parcellation_json.infos(1).description;
+            if ~ isempty(parcellationJson.infos)
+                parcellation.Description = parcellationJson.infos(1).description;
             end
 
             % link spaces from atlas
             parcellation.Spaces = siibra.items.Space.empty;
             % retrieve available spaces from atlas
-            for idx = 1:numel(parcellation_json.availableSpaces)
+            for idx = 1:numel(parcellationJson.availableSpaces)
                 % store handle to space object
-                for atlas_space_index = 1:numel(atlas.Spaces)
-                    if isequal(atlas.Spaces(atlas_space_index).Id, parcellation_json.availableSpaces(idx).id)
-                        parcellation.Spaces(end +1) = atlas.Spaces(atlas_space_index);
+                for atlasSpaceIndex = 1:numel(atlas.Spaces)
+                    if isequal(atlas.Spaces(atlasSpaceIndex).Id, parcellationJson.availableSpaces(idx).id)
+                        parcellation.Spaces(end +1) = atlas.Spaces(atlasSpaceIndex);
                     end
                 end
             end
             
             % call api to get parcellation tree
-            regions = webread(parcellation_json.links.regions.href);
+            regions = webread(parcellationJson.links.regions.href);
             
             % store graph
             parcellation.RegionTree = siibra.items.Parcellation.createParcellationTree(parcellation, regions);
@@ -51,28 +56,28 @@ classdef Parcellation < handle
             end
         end
        
-        function region_names = findRegion(obj, region_name_query)
-            region_names = obj.RegionTree.Nodes(contains(obj.RegionTree.Nodes.Name, region_name_query), 1);
+        function regionNames = findRegion(obj, regionNameQuery)
+            regionNames = obj.RegionTree.Nodes(contains(obj.RegionTree.Nodes.Name, regionNameQuery), 1);
         end
-        function region = decodeRegion(obj, region_name_query)
-            index = siibra.internal.fuzzyMatching(region_name_query, [obj.RegionTree.Nodes.Name]);
+        function region = decodeRegion(obj, regionNameQuery)
+            index = siibra.internal.fuzzyMatching(regionNameQuery, [obj.RegionTree.Nodes.Name]);
             region = obj.RegionTree.Nodes.Region(index);
         end
-        function region = getRegion(obj, region_name_query)
-            nodeId = obj.RegionTree.findnode(region_name_query);
+        function region = getRegion(obj, regionNameQuery)
+            nodeId = obj.RegionTree.findnode(regionNameQuery);
             region = obj.RegionTree.Nodes.Region(nodeId);
         end
-        function children = getChildRegions(obj, region_name)
-            nodeId = obj.RegionTree.findnode(region_name);
+        function children = getChildRegions(obj, regionName)
+            nodeId = obj.RegionTree.findnode(regionName);
             childrenIds = obj.RegionTree.successors(nodeId);
             children = obj.RegionTree.Nodes.Region(childrenIds);
         end
-        function parent_region = getParentRegion(obj, region_name)
-            nodeId = obj.RegionTree.findnode(region_name);
+        function parentRegion = getParentRegion(obj, regionName)
+            nodeId = obj.RegionTree.findnode(regionName);
             parents = obj.RegionTree.predecessors(nodeId);
             assert(length(parents) == 1, "Expect just one parent in a tree structure");
             parentId = parents(1);
-            parent_region = obj.RegionTree.Nodes.Region(parentId);
+            parentRegion = obj.RegionTree.Nodes.Region(parentId);
         end
 
         function features = getAllFeatures(obj)
@@ -105,8 +110,8 @@ classdef Parcellation < handle
             nodes(length(nodes) + 1) = root.name;
             region(length(region) + 1) = siibra.items.Region(root.name, parcellation, []);
             % make nodes unique
-            [unique_nodes, unique_indices, ~] = unique(nodes);
-            nodeTable = table(unique_nodes.', region(unique_indices).', 'VariableNames', ["Name", "Region"]);
+            [uniqueNodes, uniqueIndices, ~] = unique(nodes);
+            nodeTable = table(uniqueNodes.', region(uniqueIndices).', 'VariableNames', ["Name", "Region"]);
             tree = digraph(source, target, zeros(length(target), 1),  nodeTable);
         end
 
@@ -116,8 +121,8 @@ classdef Parcellation < handle
             % root.
             % Creates a region for each node in the parcellation tree.
 
-            for child_num = 1:numel(root.children)
-                child = root.children(child_num);
+            for childNum = 1:numel(root.children)
+                child = root.children(childNum);
                 source(length(source) + 1) = root.name;
                 target(length(target) + 1) = child.name;
                 regions(length(regions) + 1) = siibra.items.Region(child.name, parcellation, child.x_dataset_specs);

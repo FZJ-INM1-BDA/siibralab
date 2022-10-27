@@ -8,6 +8,14 @@ arguments
     category string = ""
 end
     [scriptFilePath, ~, ~] = fileparts(mfilename("fullpath"));
-    cacheFilePath = fullfile(scriptFilePath, "..", "cache", category, filename);
+    cachePath = fullfile(scriptFilePath, "..", "cache");
+    if ~isfolder(cachePath)
+        mkdir(cachePath)
+    end
+    cacheCategoryPath = fullfile(cachePath, category);
+    if ~isfolder(cacheCategoryPath)
+        mkdir(cacheCategoryPath)
+    end
+    cacheFilePath = fullfile(cacheCategoryPath, filename);
 end
 

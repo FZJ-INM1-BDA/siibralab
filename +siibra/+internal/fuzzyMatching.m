@@ -18,7 +18,7 @@ end
         ratios = cellfun(@(m) m.ratio(), matcher);
         [maxRatio, matchedIndex] = max(ratios);
         if maxRatio < 0.3
-            error (strcat("Empty result for query ", query, ".  Closest match: ", haystack(matchedIndex)));
+            error ("Empty result for query " + query + ".  Closest match: " + haystack(matchedIndex));
         end
     else
         % no python available
@@ -30,7 +30,7 @@ end
         end
         matchedIndices = find(contains(lowerHaystack, pattern));
         if isempty(matchedIndices)
-            error (strcat("Empty result for query ", query, " in ", sprintf("%s", haystack + ", ")));
+            error ("Empty result for query " + query + " in " + sprintf("%s", haystack + ", "));
         end
         matchedIndex = matchedIndices(1);
     end

@@ -7,26 +7,26 @@ classdef Atlas < handle
         Spaces (1, :) siibra.items.Space
     end
     methods
-        function atlas = Atlas(atlas_json)
-            atlas.Id = atlas_json.id;
-            atlas.Name = atlas_json.name;
+        function atlas = Atlas(atlasJson)
+            atlas.Id = atlasJson.id;
+            atlas.Name = atlasJson.name;
 
             % Spaces
-            spaces_json = webread(atlas_json.links.spaces.href);
-            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Name), spaces_json);
+            spacesJson = webread(atlasJson.links.spaces.href);
+            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Name), spacesJson);
 
             % Parcellations
-            parcellations_json = webread(atlas_json.links.parcellations.href);
-            atlas.Parcellations = arrayfun(@(json) siibra.items.Parcellation(json, atlas), parcellations_json);
+            parcellationsJson = webread(atlasJson.links.parcellations.href);
+            atlas.Parcellations = arrayfun(@(json) siibra.items.Parcellation(json, atlas), parcellationsJson);
             
         end
-        function parcellation = getParcellation(obj, parcellation_name_query)
+        function parcellation = getParcellation(obj, parcellationNameQuery)
             arguments
                 obj 
-                parcellation_name_query (1, 1) string
+                parcellationNameQuery (1, 1) string
             end
             parcellationNames = [obj.Parcellations.Name];
-            parcellation = obj.Parcellations(siibra.internal.fuzzyMatching(parcellation_name_query, parcellationNames));
+            parcellation = obj.Parcellations(siibra.internal.fuzzyMatching(parcellationNameQuery, parcellationNames));
         end
         function space = getSpace(obj, spaceName)
             arguments

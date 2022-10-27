@@ -1,6 +1,6 @@
 function spaces = viewSpaces()
 % List all available spaces
-    atlases = siibra.viewAtlases();
+    atlases = siibra.atlases();
     spaces = [atlases.Spaces];
 end
 

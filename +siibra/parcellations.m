@@ -1,6 +1,6 @@
-function parcellations = viewParcellations()
+function parcellations = parcellations()
 % List all available parcellations
-    atlases = siibra.viewAtlases();
+    atlases = siibra.atlases();
     parcellations = [atlases.Parcellations];
         
 end

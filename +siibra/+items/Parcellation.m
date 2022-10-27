@@ -94,8 +94,7 @@ classdef Parcellation < handle
         function streamlineCounts = getStreamlineCounts(obj)
             allFeatures = obj.getAllFeatures();
             streamlineCountIdx = arrayfun(@(e) strcmp(e.x_type,'siibra/features/connectivity/streamlineCounts'), allFeatures);
-            streamlineCounts = allFeatures(streamlineCountIdx);
-            
+            streamlineCounts = arrayfun(@(json) siibra.items.features.StreamlineCounts(obj, json), allFeatures(streamlineCountIdx));
         end
     end
     

@@ -1,4 +1,5 @@
 classdef Atlas < handle
+    %ATLAS The atlas holds the available parcellations and spaces
     properties
         Id (1, 1) string
         Name (1, 1) string
@@ -6,36 +7,26 @@ classdef Atlas < handle
         Spaces (1, :) siibra.items.Space
     end
     methods
-        function atlas = Atlas(atlas_json)
-            atlas.Id = atlas_json.id;
-            atlas.Name = atlas_json.name;
+        function atlas = Atlas(atlasJson)
+            atlas.Id = atlasJson.id;
+            atlas.Name = atlasJson.name;
 
             % Spaces
-            spaces = siibra.items.Space.empty;
-            spaces_json = webread(atlas_json.links.spaces.href);
-            for space_row = 1:numel(spaces_json)
-                space = siibra.items.Space(spaces_json(space_row), atlas.Id);
-                spaces(end +1) = space;
-            end
-            atlas.Spaces = spaces;
+            spacesJson = webread(atlasJson.links.spaces.href);
+            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Name), spacesJson);
 
             % Parcellations
-            parcellations = siibra.items.Parcellation.empty;
-            parcellations_json = webread(atlas_json.links.parcellations.href);
-            for parcellation_row = 1:numel(parcellations_json)
-                parcellation = siibra.items.Parcellation(parcellations_json(parcellation_row), atlas);
-                parcellations(end +1) = parcellation;
-            end
-            atlas.Parcellations = parcellations;
+            parcellationsJson = webread(atlasJson.links.parcellations.href);
+            atlas.Parcellations = arrayfun(@(json) siibra.items.Parcellation(json, atlas), parcellationsJson);
             
         end
-        function parcellation = getParcellation(obj, parcellation_name_query)
+        function parcellation = getParcellation(obj, parcellationNameQuery)
             arguments
                 obj 
-                parcellation_name_query (1, 1) string
+                parcellationNameQuery (1, 1) string
             end
             parcellationNames = [obj.Parcellations.Name];
-            parcellation = obj.Parcellations(siibra.internal.fuzzyMatching(parcellation_name_query, parcellationNames));
+            parcellation = obj.Parcellations(siibra.internal.fuzzyMatching(parcellationNameQuery, parcellationNames));
         end
         function space = getSpace(obj, spaceName)
             arguments

@@ -1,11 +1,12 @@
-function atlas = getAtlas(atlas_name)
+function atlas = getAtlas(atlasName)
 arguments
-    atlas_name (1, 1) string
+    atlasName (1, 1) string
 end
-% Construct atlas by name
-%   Detailed explanation goes here
+% Get atlas by name
+%   The provided atlas name will be fuzzy matched against all available
+%   atlas names.
     atlases = siibra.internal.initAtlases(false);
-    atlas = atlases(siibra.internal.fuzzyMatching(atlas_name, [atlases.Name]));
+    atlas = atlases(siibra.internal.fuzzyMatching(atlasName, [atlases.Name]));
 end
 
 

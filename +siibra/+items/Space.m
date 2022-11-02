@@ -7,30 +7,30 @@ classdef Space < handle
         TemplateURL (1, 1) string
         Format (1, 1) string
         VolumeType (1, 1) string
-        AtlasId (1, 1) string
+        AtlasName(1, 1) string
     end
     
     methods
-        function space = Space(atlas_space_reference_json, atlas_id)
-            space.AtlasId = atlas_id;
-            space_json = webread(atlas_space_reference_json.links.self.href);
-            space.Id = space_json.id;
-            space.Name = space_json.name;
-            space.Format = space_json.type;
-            space.VolumeType = space_json.src_volume_type;
-            space.TemplateURL = space_json.links.templates.href;
+        function space = Space(atlasSpaceReferenceJson, atlasName)
+            space.AtlasName = atlasName;
+            spaceJson = webread(atlasSpaceReferenceJson.links.self.href);
+            space.Id = spaceJson.id;
+            space.Name = spaceJson.name;
+            space.Format = spaceJson.type;
+            space.VolumeType = spaceJson.src_volume_type;
+            space.TemplateURL = spaceJson.links.templates.href;
         end
         function normalizedName = get.NormalizedName(obj)
             normalizedName = strrep(obj.Name, " ", "");
         end
         function niftiImage = loadTemplate(obj)
-            cached_path = siibra.internal.cache(strcat(obj.Name, ".nii"), "template_cache");
-            if ~isfile(cached_path)
+            cachedPath = siibra.internal.cache(obj.Name + ".nii", "template_cache");
+            if ~isfile(cachedPath)
                 options = weboptions;
                 options.Timeout = 30;
-                websave(cached_path, obj.TemplateURL, options);
+                websave(cachedPath, obj.TemplateURL, options);
             end
-            niftiImage = siibra.items.NiftiImage(cached_path);
+            niftiImage = siibra.items.NiftiImage(cachedPath);
         end
     end
 end

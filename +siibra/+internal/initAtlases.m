@@ -1,20 +1,15 @@
-function atlases = initAtlases(clear_cache)
+function atlases = initAtlases(clearCache)
 arguments
-    clear_cache (1, 1) logical
+    clearCache (1, 1) logical
 end
-    
-    cached_file_name = siibra.internal.cache("atlases.mat");
-    if clear_cache || ~isfile(cached_file_name)
-        options = weboptions;
-        options.Timeout = 30;
-        atlases_json = webread(siibra.internal.API.absoluteLink("atlases"));
-        atlases = siibra.items.Atlas.empty;
-        for atlas_row = 1:numel(atlases_json)
-            atlas = siibra.items.Atlas(atlases_json(atlas_row));
-            atlases(end + 1) = atlas;
-        end
-        save(cached_file_name, 'atlases');
+% Entrypoint for building atlases, parcellations, etc.
+    cachedFileName = siibra.internal.cache("atlases.mat");
+    if clearCache || ~isfile(cachedFileName)
+        disp("Fetching metadata from the siibra server...")
+        atlasesJson = siibra.internal.API.atlases();
+        atlases = arrayfun(@(j) siibra.items.Atlas(j), atlasesJson);
+        save(cachedFileName, 'atlases');
     else
-        load(cached_file_name, 'atlases');
+        load(cachedFileName, 'atlases');
     end
 end

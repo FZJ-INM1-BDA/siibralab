@@ -1,4 +1,5 @@
 classdef Region < handle
+    %REGION A region is a node in the RegionTree of the parcellation.
     properties
         Name string
         NormalizedName string
@@ -9,17 +10,17 @@ classdef Region < handle
         IsLeaf logical
     end
     methods
-        function region = Region(name, parcellation, dataset_specs)
+        function region = Region(name, parcellation, datasetSpecs)
             region.Name = name;
             region.Parcellation = parcellation;
             spaces = siibra.items.Space.empty;
-            % parse dataset_specs for this region
-            if ~isempty(dataset_specs)
-                for i = 1:numel(dataset_specs)
-                    if iscell(dataset_specs)
-                        specs = dataset_specs{i};
+            % parse datasetSpecs for this region
+            if ~isempty(datasetSpecs)
+                for i = 1:numel(datasetSpecs)
+                    if iscell(datasetSpecs)
+                        specs = datasetSpecs{i};
                     else
-                        specs = dataset_specs(i);
+                        specs = datasetSpecs(i);
                     end
                     if isfield(specs, "space_id")
                         for spaceIndex = 1:numel(parcellation.Spaces)

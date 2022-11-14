@@ -53,22 +53,25 @@ classdef StreamlineCounts
                 binaryMatrixCachePath = siibra.internal.cache(featureIdNormalized + ".bin", "parcellation_features");
                 gunzip(compressedMatrixCachePath, siibra.internal.cache("", "parcellation_features"))
                 f = fopen(binaryMatrixCachePath, "r");
-                decompressedMatrix = fread(f);
+                decompressedMatrix = fread(f, matrixJson.matrix.dtype);
                 fclose(f);
 
                 % delete intermediate files
                 delete(compressedMatrixCachePath)
                 delete(binaryMatrixCachePath)
 
-                matrix = cast(reshape(decompressedMatrix, dim1, dim2), matrixJson.matrix.dtype);
-                
+                matrix = reshape(decompressedMatrix, dim1, dim2);
+             
                 connectivityMatrix = array2table(matrix);
-                connectivityMatrix.Properties.VariableNames = matrixJson.matrix.columns;
-                connectivityMatrix.Properties.RowNames = matrixJson.matrix.columns;
+                columnNameLengths = cellfun(@(n) strlength(n), matrixJson.columns);
+                columnNamesToBeTrimmed = matrixJson.columns(columnNameLengths > 63);
+                matrixJson.columns(columnNameLengths > 63) = cellfun(@(n) n(1:63), columnNamesToBeTrimmed, 'UniformOutput',false);
+                connectivityMatrix.Properties.VariableNames = matrixJson.columns;
+                connectivityMatrix.Properties.RowNames = matrixJson.columns;
                 % cache matrix
                 save(matrixCachePath, "connectivityMatrix");
             end
-            connectivityMatrix = load(matrixCachePath, "connectivityMatrix");
+            connectivityMatrix = load(matrixCachePath, "connectivityMatrix").connectivityMatrix;
         end
     end
 end

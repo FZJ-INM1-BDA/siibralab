@@ -83,5 +83,30 @@ classdef Region < handle
                 error("continuous maps are supported on leafs only!");
             end 
         end
+
+        function features = getAllFeatures(obj)
+            cached_file_name = siibra.internal.cache(obj.NormalizedName + ".mat", "region_features");
+            if ~isfile(cached_file_name)
+                features = siibra.internal.API.doWebreadWithLongTimeout( ...
+                    siibra.internal.API.featuresForRegion( ...
+                    obj.Parcellation.Atlas.Id, ...
+                    obj.Parcellation.Id, ...
+                    obj.Name));
+                save(cached_file_name, 'features');
+            else
+                load(cached_file_name, 'features')
+            end
+        end
+
+        function receptorDensities = getReceptorDensities(obj)
+            allFeatures = obj.getAllFeatures();
+            receptorIdx = cellfun(@(e) strcmp(e.x_type,'siibra/features/receptor'), allFeatures);
+            if ~any(receptorIdx)
+                receptorDensities = siibra.items.features.ReceptorDensity.empty;
+                return
+            end
+            receptorDensities = cellfun(@(json) siibra.items.features.ReceptorDensity(obj, json), allFeatures(receptorIdx));
+
+        end
     end
 end

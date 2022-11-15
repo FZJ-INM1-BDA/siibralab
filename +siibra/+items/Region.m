@@ -105,6 +105,7 @@ classdef Region < handle
                 receptorDensities = siibra.items.features.ReceptorDensity.empty;
                 return
             end
+            assert(nnz(receptorIdx) == 1, "Expecting exactly one receptor density feature for region")
             receptorDensities = cellfun(@(json) siibra.items.features.ReceptorDensity(obj, json), allFeatures(receptorIdx));
 
         end

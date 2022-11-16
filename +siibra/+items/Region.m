@@ -87,11 +87,17 @@ classdef Region < handle
         function features = getAllFeatures(obj)
             cached_file_name = siibra.internal.cache(obj.NormalizedName + ".mat", "region_features");
             if ~isfile(cached_file_name)
-                features = num2cell(siibra.internal.API.doWebreadWithLongTimeout( ...
+                features = siibra.internal.API.doWebreadWithLongTimeout( ...
                     siibra.internal.API.featuresForRegion( ...
                     obj.Parcellation.Atlas.Id, ...
                     obj.Parcellation.Id, ...
-                    obj.Name)));
+                    obj.Name));
+                
+                % make sure to always return a cell array
+                if ~iscell(features)
+                    features = num2cell(features);
+                end
+
                 save(cached_file_name, 'features');
             else
                 load(cached_file_name, 'features')

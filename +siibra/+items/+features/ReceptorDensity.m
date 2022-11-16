@@ -4,34 +4,36 @@ classdef ReceptorDensity
     
     properties
         Region siibra.items.Region
-        FeatureId string
+        Id string
         Description string
         Name string
         DOI string
-        Fingerprints string
+        Fingerprint string
+        Unit string
     end
     
     methods
         function obj = ReceptorDensity(region, receptorJson)
             obj.Region = region;
-            obj.FeatureId = receptorJson.x_id;
+            obj.Id = receptorJson.x_id;
             obj.Description = receptorJson.metadata.description;
             obj.Name = receptorJson.metadata.fullName;
-            obj.DOI = receptorJson.urls.doi;
+            obj.DOI = "https://doi.org/" + receptorJson.urls.doi;
+            obj.Unit = "fmol/mg";
         end
         
-        function fingerprints = get.Fingerprints(obj)
+        function fingerprints = get.Fingerprint(obj)
             fingerprintJson = siibra.internal.API.doWebreadWithLongTimeout( ...
                 siibra.internal.API.regionFeature( ...
                 obj.Region.Parcellation.Atlas.Id, ...
                 obj.Region.Parcellation.Id, ...
                 obj.Region.Name, ...
-                obj.FeatureId));
+                obj.Id));
             fingerprintStruct = fingerprintJson.data.fingerprints;
             receptors = fieldnames(fingerprintStruct);
             means = arrayfun(@(i) fingerprintStruct.(receptors{i}).mean, 1:numel(receptors));
             stds = arrayfun(@(i) fingerprintStruct.(receptors{i}).std, 1:numel(receptors));
-            fingerprints = table(means.', stds.', 'VariableNames', ["Mean fmol/mg", "Std fmol/mg"], 'RowNames', receptors);
+            fingerprints = table(means.', stds.', 'VariableNames', ["Mean", "Std"], 'RowNames', receptors);
         end
     end
 end

@@ -22,9 +22,6 @@ classdef NiftiImage < handle
         end
         function data = loadData(obj)
             data = niftiread(obj.FilePath);
-            % The permutation is necessary to align MATLAB indexing
-            % with the RAS orientation.
-            data = permute(data, [2, 1, 3]);
         end
         function normalized = normalizedData(obj)
             normalized = obj.loadData();

@@ -79,6 +79,23 @@ classdef Parcellation < handle
             parentId = parents(1);
             parentRegion = obj.RegionTree.Nodes.Region(parentId);
         end
+
+        function features = getAllFeatures(obj)
+            cached_file_name = siibra.internal.cache(obj.Name + ".mat", "parcellation_features");
+            if ~isfile(cached_file_name)
+                features = siibra.internal.API.featuresForParcellation(obj.Atlas.Id, obj.Id);
+                save(cached_file_name, 'features');
+            else
+                load(cached_file_name, 'features')
+            end
+
+        end
+
+        function streamlineCounts = getStreamlineCounts(obj)
+            allFeatures = obj.getAllFeatures();
+            streamlineCountIdx = arrayfun(@(e) strcmp(e.x_type,'siibra/features/connectivity/streamlineCounts'), allFeatures);
+            streamlineCounts = arrayfun(@(json) siibra.items.features.StreamlineCounts(obj, json), allFeatures(streamlineCountIdx));
+        end
     end
     
 

@@ -34,6 +34,9 @@ end
         end
         matchedIndex = matchedIndices(1);
     end
+    if ~strcmp(query, haystack(matchedIndex))
+        display("Resolved query '" + query + "' to: " + haystack(matchedIndex));
+    end
     
 end
 

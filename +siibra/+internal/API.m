@@ -93,12 +93,25 @@ classdef API
             featureList = cat(1, featureList{:});
         end
         function absoluteLink = parcellationFeature(atlasId, parcellationId, featureId)
+            % get specific feature by feature id.
             relativeLink = "/atlases/" + atlasId + ...
                             "/parcellations/" + parcellationId + ...
                             "/features/" + featureId;
             absoluteLink = siibra.internal.API.absoluteLinkV2(relativeLink);
         end
-
+        function absoluteLink = featuresForRegion(atlasId, parcellationId, regionName)
+            relativeLink = "/atlases/" +atlasId + ...
+                            "/parcellations/" + parcellationId + ...
+                            "/regions/" + regionName + "/features";
+            absoluteLink = siibra.internal.API.absoluteLinkV2(relativeLink);
+        end
+        function absoluteLink = regionFeature(atlasId, parcellationId, regionName, featureId)
+            relativeLink = "/atlases/" +atlasId + ...
+                            "/parcellations/" + parcellationId + ...
+                            "/regions/" + regionName + ...
+                            "/features/" + featureId;
+            absoluteLink = siibra.internal.API.absoluteLinkV2(relativeLink);
+        end
     end
     
 end

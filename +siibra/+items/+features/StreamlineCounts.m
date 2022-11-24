@@ -46,12 +46,12 @@ classdef StreamlineCounts
                 % write decoded and compressed matrix to file
                 compressedMatrixCachePath = siibra.internal.cache(featureIdNormalized + ".bin.gzip", "parcellation_features");
                 f = fopen(compressedMatrixCachePath, "w");
-                fwrite(f, decodedMatrix)
+                fwrite(f, decodedMatrix);
                 fclose(f);
     
                 % decompress file and read it again
                 binaryMatrixCachePath = siibra.internal.cache(featureIdNormalized + ".bin", "parcellation_features");
-                gunzip(compressedMatrixCachePath, siibra.internal.cache("", "parcellation_features"))
+                gunzip(compressedMatrixCachePath, siibra.internal.cache("", "parcellation_features"));
                 f = fopen(binaryMatrixCachePath, "r");
                 decompressedMatrix = fread(f, matrixJson.matrix.dtype);
                 fclose(f);

@@ -16,5 +16,3 @@ jobs:
 
       - name: Run all tests
         uses: matlab-actions/run-tests@v1
-        with:
-          select-by-folder: +test

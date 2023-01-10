@@ -3,7 +3,7 @@ classdef TestAtlas < matlab.unittest.TestCase
     methods(TestClassSetup)
         % Shared setup for the entire test class
         function initCache(testCase)
-            % siibra.clearCache;
+            siibra.clearCache;
             siibra.internal.initAtlases(false);
         end
     end

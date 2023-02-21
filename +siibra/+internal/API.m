@@ -3,7 +3,8 @@ classdef API
     
     properties (Constant=true)
         Endpoint = "https://siibra-api-stable.apps.hbp.eu/v1_0/"
-        EndpointV2 = "https://siibra-api-latest.apps-dev.hbp.eu/v2_0"
+        EndpointV2 = "https://siibra-api-stable.apps.hbp.eu/v2_0"
+        EndpointV3 = "https://siibra-api-latest.apps-dev.hbp.eu/v3_0" % still finalizing
     end
 
     methods (Static)
@@ -12,6 +13,9 @@ classdef API
         end
         function link = absoluteLinkV2(relativeLink)
             link = siibra.internal.API.EndpointV2 + relativeLink;
+        end
+        function link = absoluteLinkV3(relativeLink)
+            link = siibra.internal.API.EndpointV3 + relativeLink;
         end
         function result = doWebreadWithLongTimeout(absoluteLink)
             options = weboptions;
@@ -41,21 +45,26 @@ classdef API
             absoluteLink = siibra.internal.API.absoluteLink(relativeLink);
         end
         
-        function absoluteLink = regionMap(atlasId, parcellationId, regionName, spaceId, mapOrInfo, mapType)
-            relativeLink = "atlases/" + atlasId + ...
-                            "/parcellations/" + parcellationId + ...
-                            "/regions/" + regionName + ...
-                            "/regional_map/" + mapOrInfo + ...
-                            "?space_id=" + spaceId + ...
-                            "&map_type=" + mapType;
-            absoluteLink = siibra.internal.API.absoluteLink(relativeLink);
+        function absoluteLink = regionMap(parcellationId, regionName, spaceId)
+            relativeLink = "/map/statistical_map.nii.gz" + ...
+                            "?parcellation_id=" + parcellationId + ...
+                            "&space_id=" + spaceId + ...
+                            "&region_id=" + regionName;
+            absoluteLink = siibra.internal.API.absoluteLinkV3(relativeLink);
         end
         
-        function absoluteLink = parcellationMap(atlasId, spaceId, parcellationId)
-            relativeLink = "atlases/" + atlasId + ...
-                            "/spaces/" + spaceId + ...
-                            "/parcellation_maps?parcellation_id=" + parcellationId;
-            absoluteLink = siibra.internal.API.absoluteLink(relativeLink); 
+        function absoluteLink = parcellationMap(spaceId, parcellationId, regionName)
+            arguments
+                spaceId string
+                parcellationId string
+                regionName string = ""
+            end
+            relativeLink = "/map/labelled_map.nii.gz?parcellation_id=" + parcellationId + ...
+                            "&space_id=" + spaceId;
+            if ~isempty(regionName)
+                relativeLink = relativeLink + "&region_id=" + regionName;
+            end
+            absoluteLink = siibra.internal.API.absoluteLinkV3(relativeLink); 
         end
         function absoluteLink = featuresPageForParcellation(atlasId, parcellationId, page, size)
             relativeLink = "/atlases/" + atlasId + ...

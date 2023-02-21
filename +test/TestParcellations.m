@@ -31,25 +31,25 @@ classdef TestParcellations < matlab.unittest.TestCase
             julich = siibra.getParcellation("human", "julich 2.9");
             labeledMapMNI = julich.parcellationMap("MNI Colin 27").fetch();
             labeledMap152 = julich.parcellationMap("MNI152 2009c nonl asym").fetch();
-            % The julich brain has two hemispheres.
-            testCase.verifyEqual(numel(labeledMapMNI), 2);
-            testCase.verifyEqual(numel(labeledMap152), 2);
-            % Assert the shape of the first hemisphere.
-            testCase.verifyEqual(size(labeledMap152(1).loadData), [193   229   193])
+            % The julich brain has now one combined map with the two hemispheres.
+            testCase.verifyEqual(numel(labeledMapMNI), 1);
+            testCase.verifyEqual(numel(labeledMap152), 1);
+            % Assert the shape of the whole brain.
+            testCase.verifyEqual(size(labeledMap152(1).loadData), [289   361   271]);
 
 
             whiteMatterBundles = siibra.getParcellation("human", "white matter bundles");
             labeledMap152 = whiteMatterBundles.parcellationMap("MNI152 2009c nonl asym").fetch();   
             % White matter bundles has one volume
-            testCase.verifyEqual(numel(labeledMap152), 1)
-            testCase.verifyEqual(size(labeledMap152.loadData), [193   229   193])
+            testCase.verifyEqual(numel(labeledMap152), 1);
+            testCase.verifyEqual(size(labeledMap152.loadData), [193   229   193]);
             
             difumo64 = siibra.getParcellation("human", "difumo 64");
             probabilityMap = difumo64.parcellationMap("MNI152 2009c nonl asym").fetch();
-
-            % testCase.verfyEqual(size(probabilityMap), 4)
-
+            testCase.verifyEqual(size(probabilityMap.loadData), [104   123   104 ]);
         end
+
+        
     end
     
 end

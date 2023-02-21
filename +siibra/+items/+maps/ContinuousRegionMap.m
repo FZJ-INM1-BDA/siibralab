@@ -24,6 +24,9 @@ classdef ContinuousRegionMap < handle
                     obj.Space.Id ...
                     ) ...
                 );
+            if ~regionMapInfoJson.hasRegionalMap
+                error('StatisticalMap:NotFound', "Region " + region.Name + " has no statistical map!")
+            end
             datasetSpecs = regionMapInfoJson.x_dataset_specs;
             if ~iscell(datasetSpecs)
                 datasetSpecs = num2cell(datasetSpecs);
@@ -40,9 +43,9 @@ classdef ContinuousRegionMap < handle
                 obj.Description = "Not available";
                 obj.DOI = string.empty;
             else
-                obj.Name = regionMapInfoJson.x_dataset_specs{datasetIndex}.name;
-                obj.Description = regionMapInfoJson.x_dataset_specs{datasetIndex}.description;
-                obj.DOI = regionMapInfoJson.x_dataset_specs{datasetIndex}.urls.doi;
+                obj.Name = datasetSpecs{datasetIndex}.name;
+                obj.Description = datasetSpecs{datasetIndex}.description;
+                obj.DOI = datasetSpecs{datasetIndex}.urls.doi;
             end
         end
         
@@ -55,12 +58,9 @@ classdef ContinuousRegionMap < handle
                 siibra.internal.API.doWebsaveWithLongTimeout( ...
                     obj.CachePath, ...
                     siibra.internal.API.regionMap(...
-                    obj.Region.Parcellation.Atlas.Id, ...
                     obj.Region.Parcellation.Id, ...
                     obj.Region.Name, ...
-                    obj.Space.Id, ...
-                    "map", ...
-                    "CONTINUOUS"));
+                    obj.Space.Id));
             end
             nifti = siibra.items.NiftiImage(obj.CachePath);
         end

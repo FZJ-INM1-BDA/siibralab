@@ -7,7 +7,6 @@ classdef LabelledRegionMap < handle
     properties
         Region (1, 1) % siibra.items.Region
         Space (1, :) siibra.items.Space
-        LabelIndex (1,1) uint32 {mustBeFinite}
     end
     methods
         function obj = LabelledRegionMap(region, space)

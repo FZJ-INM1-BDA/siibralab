@@ -16,3 +16,13 @@ jobs:
 
       - name: Run all tests
         uses: matlab-actions/run-tests@v1
+
+      - name: Convert the walkthrough live script into script
+        uses: matlab-actions/run-command@v1
+        with:
+          command: export("walkthrough.mlx", format="m");
+
+      - name: Run walkthrough
+        uses: matlab-actions/run-command@v1
+        with:
+          command: walkthrough

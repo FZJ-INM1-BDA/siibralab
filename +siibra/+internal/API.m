@@ -57,7 +57,7 @@ classdef API
             arguments
                 spaceId string
                 parcellationId string
-                regionName string = ""
+                regionName string = string.empty
             end
             relativeLink = "/map/labelled_map.nii.gz?parcellation_id=" + parcellationId + ...
                             "&space_id=" + spaceId;

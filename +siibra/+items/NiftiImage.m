@@ -24,14 +24,12 @@ classdef NiftiImage < handle
             data = niftiread(obj.FilePath);
         end
         function normalized = normalizedData(obj)
-            normalized = obj.loadData();
-            if isfloat(normalized)
-                if max(normalized(:)) > 1
-                    normalized = normalized ./ max(normalized(:));
-                end
-
-                normalized = normalized .* 256 ;
-            end
+            normalized = single(obj.loadData());
+            minValue = min(normalized(:));
+            maxValue = max(normalized(:));
+            range = single(maxValue - minValue);
+            normalized = (normalized - minValue) ./ range;
+            normalized = normalized .* 254 + 1;
             normalized = cast(normalized, 'uint8');
         end
         function outputView = getOutputView(obj)

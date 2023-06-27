@@ -120,10 +120,6 @@ classdef Region < handle
             viewer.Layout.Column = 2;
             viewer.BackgroundColor="white";
             viewer.BackgroundGradient="off";
-            hVolume = volshow(template, "Parent",viewer);
-            hVolume.RenderingStyle = "GradientOpacity";
-            hVolume.Alphamap = linspace(0,0.2,256);
-            hVolume.OverlayAlphamap = 0.2;
             hVolumeContinuous = volshow(template, ...
                 OverlayData=continuousMap, ...
                 Parent=viewer, ...

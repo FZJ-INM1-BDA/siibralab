@@ -49,11 +49,8 @@ classdef Parcellation < handle
         end
 
         function map = parcellationMap(obj, spaceName)
-            for idx = 1:numel(obj.Spaces)
-                if obj.Spaces(idx).Name == spaceName
-                    map = siibra.items.maps.ParcellationMap(obj, obj.Spaces(idx));
-                end
-            end
+            idx = siibra.internal.fuzzyMatching(spaceName, [obj.Spaces.Name]);
+            map = siibra.items.maps.ParcellationMap(obj, obj.Spaces(idx));
         end
        
         function regionNames = findRegion(obj, regionNameQuery)

@@ -32,6 +32,11 @@ classdef ParcellationMap < handle
             end
             nifti = siibra.items.NiftiImage(obj.CachePath);
         end
+
+        function visualize(obj)
+            labelVolume = obj.fetch().loadData;
+            volumeViewer(labelVolume, VolumeType="Labels");
+        end
     end
 end
 

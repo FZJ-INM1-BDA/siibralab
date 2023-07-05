@@ -57,9 +57,6 @@ classdef Region < handle
             isLeaf = isempty(obj.Children);
         end
         function mask = getMask(obj, spaceName)
-            % Perform Breadth-first search
-            % when node supports space, add to list of regions to join
-            % when node does not support space check its children
             space = obj.matchAgainstSpacesParcellationSupports(spaceName);
             mask = siibra.items.maps.LabelledRegionMap(obj, space);
         end
@@ -104,5 +101,61 @@ classdef Region < handle
             receptorDensities = cellfun(@(json) siibra.items.features.ReceptorDensity(obj, json), allFeatures(receptorIdx));
 
         end
+
+        function visualizeInTemplate(obj, spaceName, colormap_name)
+            arguments
+                obj
+                spaceName string
+                colormap_name string = "jet"
+            end
+
+            space = obj.matchAgainstSpacesParcellationSupports(spaceName);
+            template = space.loadTemplate().normalizedData();
+            continuousMap = obj.continuousMap(spaceName).fetch().loadData();
+
+            fig = uifigure;
+            g = uigridlayout(fig, [2, 2]);
+            viewer = viewer3d(g);
+            viewer.Layout.Row = 2;
+            viewer.Layout.Column = 2;
+            viewer.BackgroundColor="white";
+            viewer.BackgroundGradient="off";
+            hVolumeContinuous = volshow(template, ...
+                OverlayData=continuousMap, ...
+                Parent=viewer, ...
+                Alphamap=linspace(0,0.2,256), ...
+                OverlayRenderingStyle="GradientOverlay", ...
+                RenderingStyle="GradientOpacity");
+            
+            hVolumeContinuous.OverlayAlphamap=linspace(0,0.5,256);
+            
+            cmap = colormap(colormap_name);
+            cmap(1, :) = [0, 0, 0];
+            color_indices = cast(continuousMap * 254 + 1, "uint8");
+            probability_color_volume = reshape(cmap(color_indices, :), [size(continuousMap), 3]);
+            
+            cmap = colormap("gray");
+            color_indices = template;
+            template_color_volume = reshape(cmap(color_indices, :), [size(template), 3]);
+            
+            mixed_volume = template_color_volume;
+            mixed_volume(continuousMap>0) = probability_color_volume(continuousMap>0);
+            
+            panel1 = uipanel(g);
+            panel1.Layout.Row = 1;
+            panel1.Layout.Column = 1;
+            sliceViewer(permute(mixed_volume, [2, 1, 3, 4]), "Parent",panel1, "SliceDirection","Y");
+            
+            panel2 = uipanel(g);
+            panel2.Layout.Row = 1;
+            panel2.Layout.Column = 2;
+            sliceViewer(mixed_volume, "Parent",panel2, "SliceDirection","Y");
+            
+            panel3 = uipanel(g);
+            panel3.Layout.Row = 2;
+            panel3.Layout.Column = 1;
+            sliceViewer(flip(permute(mixed_volume, [2, 1, 3, 4]), 1), "Parent",panel3, "SliceDirection","Z");
+        end
+
     end
 end

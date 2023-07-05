@@ -61,18 +61,7 @@ classdef Region < handle
             % when node supports space, add to list of regions to join
             % when node does not support space check its children
             space = obj.matchAgainstSpacesParcellationSupports(spaceName);
-            regions = obj;
-            regionsThatSupportRequestedSpace = siibra.items.Region.empty;
-            while ~isempty(regions)
-                region = regions(1);
-                regions = regions(2:end);
-                if region.doesRegionSupportSpace(space)
-                    regionsThatSupportRequestedSpace(end + 1) = region;
-                else
-                    regions = [regions, region.Children.'];
-                end
-            end
-            mask = siibra.items.maps.LabelledRegionMap(obj.NormalizedName, regionsThatSupportRequestedSpace, space);
+            mask = siibra.items.maps.LabelledRegionMap(obj, space);
         end
 
         function map = continuousMap(obj, spaceName)

@@ -1,0 +1,28 @@
+name: MATLAB Tests
+
+# Controls when the action will run. 
+on: [push]
+
+jobs:
+
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      - name: Run all tests
+        uses: matlab-actions/run-tests@v1
+
+      - name: Convert the walkthrough live script into script
+        uses: matlab-actions/run-command@v1
+        with:
+          command: export("walkthrough.mlx", format="m");
+
+      - name: Run walkthrough
+        uses: matlab-actions/run-command@v1
+        with:
+          command: walkthrough

@@ -33,9 +33,25 @@ classdef ParcellationMap < handle
             nifti = siibra.items.NiftiImage(obj.CachePath);
         end
 
-        function visualize(obj)
+        function visualize(obj, colorMapName)
+            arguments
+                obj
+                colorMapName string = "lines"
+            end
+
+            template = obj.Space.loadTemplate().normalizedData();
             labelVolume = obj.fetch().loadData;
-            volumeViewer(labelVolume, VolumeType="Labels");
+            
+            volshow(template, ...
+                "RenderingStyle","GradientOpacity", ...
+                "Alphamap", linspace(0,0.2,256), ...
+                "OverlayData", labelVolume, ...
+                "OverlayRenderingStyle", "LabelOverlay", ...
+                "OverlayAlphamap", linspace(0.3,1.0,256), ...
+                "OverlayColormap", colormap(colorMapName) ...
+                );
+            
+            
         end
     end
 end

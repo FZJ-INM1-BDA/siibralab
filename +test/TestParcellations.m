@@ -35,7 +35,7 @@ classdef TestParcellations < matlab.unittest.TestCase
             testCase.verifyEqual(numel(labeledMapMNI), 1);
             testCase.verifyEqual(numel(labeledMap152), 1);
             % Assert the shape of the whole brain.
-            testCase.verifyEqual(size(labeledMap152(1).loadData), [289   361   271]);
+            testCase.verifyEqual(size(labeledMap152(1).loadData), [193   229   193]);
 
 
             whiteMatterBundles = siibra.getParcellation("human", "white matter bundles");

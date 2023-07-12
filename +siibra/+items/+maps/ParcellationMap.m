@@ -39,7 +39,7 @@ classdef ParcellationMap < handle
                 colorMapName string = "lines"
             end
 
-            template = obj.Space.loadTemplate().normalizedData();
+            template = obj.Space.loadTemplateResampledForParcellation(obj.Parcellation).normalizedData();
             labelVolume = obj.fetch().loadData;
             
             volshow(template, ...

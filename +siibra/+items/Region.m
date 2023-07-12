@@ -110,7 +110,7 @@ classdef Region < handle
             end
 
             space = obj.matchAgainstSpacesParcellationSupports(spaceName);
-            template = space.loadTemplate().normalizedData();
+            template = space.loadTemplateResampledForParcellation(obj.Parcellation).normalizedData();
             continuousMap = obj.continuousMap(spaceName).fetch().loadData();
 
             fig = uifigure;

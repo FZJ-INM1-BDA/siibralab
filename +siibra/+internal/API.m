@@ -66,6 +66,17 @@ classdef API
             end
             absoluteLink = siibra.internal.API.absoluteLinkV3(relativeLink); 
         end
+
+        function absoluteLink = templateForParcellationMap(spaceId, parcellationId)
+            arguments
+                spaceId string
+                parcellationId string
+            end
+            relativeLink = "/map/resampled_template?parcellation_id=" + parcellationId + ...
+                            "&space_id=" + spaceId;
+            absoluteLink = siibra.internal.API.absoluteLinkV3(relativeLink); 
+        end
+
         function absoluteLink = featuresPageForParcellation(atlasId, parcellationId, page, size)
             relativeLink = "/atlases/" + atlasId + ...
                             "/parcellations/" + parcellationId + ...

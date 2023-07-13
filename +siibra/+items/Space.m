@@ -32,5 +32,15 @@ classdef Space < handle
             end
             niftiImage = siibra.items.NiftiImage(cachedPath);
         end
+        function niftiImage = loadTemplateResampledForParcellation(obj, parcellation)
+            cachedPath = siibra.internal.cache(obj.Name + "-" + parcellation.Name + ".nii.gz", "template_cache");
+            if ~isfile(cachedPath)
+                siibra.internal.API.doWebsaveWithLongTimeout( ...
+                    cachedPath, ...
+                    siibra.internal.API.templateForParcellationMap(obj.Id, parcellation.Id) ...
+                    )
+            end
+            niftiImage = siibra.items.NiftiImage(cachedPath);
+        end
     end
 end

@@ -10,3 +10,16 @@ siibra provides structured acccess to parcellation schemes in different brain re
 The main implementation of siibra is the Python client [siibra-python](https://github.com/FZJ-INM1-BDA/siibra-python). To understand the scope, please refer to the [documentation](https://siibra-python.readthedocs.io). There is also an interactive web application built around a 3D viewer, [siibra-explorer](https://github.com/FZJ-INM1-BDA/siibra-explorer), which is [hosted as part of the EBRAINS infrastructure](https://atlases.ebrains.eu/viewer). 
 
 The toolbox is in very early development. Its API is not yet stable and the set of supported features is still basic. We share releases of the toolbox on [matlab file exchange](https://www.mathworks.com/matlabcentral/fileexchange). If you are interested in the ongoing development and future releases, [drop us a note](mailto:info@siibra.eu).
+
+# Getting started
+
+The `walkthrough.mlx` live script is a good starting point, as it gives a tour through the functionality.
+
+It shows how to:
+* navigate and access information
+* visualize brain regions and parcellations
+* how to assign brain regions to volumes of interest.
+  
+Try it here: [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=FZJ-INM1-BDA/siibralab&file=walkthrough.mlx)
+
+![image001](https://github.com/scalableminds/siibra-matlab/assets/2582395/457b3162-beb4-4458-bcf9-58df9d9cc740)

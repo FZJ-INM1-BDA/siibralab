@@ -1,6 +1,7 @@
 # siibraLab - a MATLAB toolbox for working with brain atlases using the siibra toolsuite
 
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=FZJ-INM1-BDA/siibralab&file=walkthrough.mlx)
+[![View siibralab on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/121148-siibralab)
 
 ``siibra`` is a toolsuite for working with brain atlases that integrate parcellations and reference spaces at different spatial scales, covering multiple aspects of brain organization, and linking features from different data modalitites to brain structures. It aims to facilitate the programmatic and reproducible incorporation of brain region features from different sources into reproducible neuroscience workflows.  siibraLab is a Matlab® toolbox for accessing functions provided in siibra. 
 

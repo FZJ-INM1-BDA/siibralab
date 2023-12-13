@@ -13,7 +13,7 @@ The toolbox is in very early development. Its API is not yet stable and the set 
 
 # Getting started
 
-The `walkthrough.mlx` live script is a good starting point, as it gives a tour through the functionality.
+The `walkthrough.mlx` live script gives a tour through the already existing functionality.
 
 It shows how to:
 * navigate and access information

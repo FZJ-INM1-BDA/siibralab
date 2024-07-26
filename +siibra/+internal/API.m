@@ -4,7 +4,7 @@ classdef API
     properties (Constant=true)
         Endpoint = "https://siibra-api-stable.apps.hbp.eu/v1_0/"
         EndpointV2 = "https://siibra-api-stable.apps.hbp.eu/v2_0"
-        EndpointV3 = "https://siibra-api-latest.apps-dev.hbp.eu/v3_0" % still finalizing
+        EndpointV3 = "https://siibra-api-stable.apps.hbp.eu/v3_0"
     end
 
     methods (Static)

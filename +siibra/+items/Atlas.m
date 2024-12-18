@@ -8,16 +8,14 @@ classdef Atlas < handle
     end
     methods
         function atlas = Atlas(atlasJson)
-            atlas.Id = atlasJson.id;
+            atlas.Id = atlasJson.x_id;
             atlas.Name = atlasJson.name;
 
             % Spaces
-            spacesJson = webread(atlasJson.links.spaces.href);
-            atlas.Spaces = arrayfun(@(j) siibra.items.Space(j, atlas.Name), spacesJson);
+            atlas.Spaces = arrayfun(@(spaceRef) siibra.items.Space(siibra.internal.API.space(spaceRef.x_id), atlas.Name), atlasJson.spaces);
 
             % Parcellations
-            parcellationsJson = webread(atlasJson.links.parcellations.href);
-            atlas.Parcellations = arrayfun(@(json) siibra.items.Parcellation(json, atlas), parcellationsJson);
+            atlas.Parcellations = arrayfun(@(parcellationRef) siibra.items.Parcellation(siibra.internal.API.parcellation(parcellationRef.x_id), atlas), atlasJson.parcellations);
             
         end
         function parcellation = getParcellation(obj, parcellationNameQuery)

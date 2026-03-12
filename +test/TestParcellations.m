@@ -14,13 +14,13 @@ classdef TestParcellations < matlab.unittest.TestCase
         function selectParcellation(testCase)
 
             julich = siibra.getParcellation("human", "julich 2.9");
-            testCase.verifyEqual(julich.Name, "Julich-Brain Cytoarchitectonic Maps 2.9");
+            testCase.verifyEqual(julich.Name, "Julich-Brain Cytoarchitectonic Atlas (v2.9)");
 
             whiteMatterBundles = siibra.getParcellation("human", "white matter bundles");
-            testCase.verifyEqual(whiteMatterBundles.Name, "Long White Matter Bundles");
+            testCase.verifyEqual(whiteMatterBundles.Name, "Deep white matter fibre bundles");
 
-            primate = siibra.getParcellation("monkey", "primate");
-            testCase.verifyEqual(primate.Name, "Non-human primate");
+            primate = siibra.getParcellation("monkey", "monkey");
+            testCase.verifyEqual(primate.Name, "MEBRAINS population-based monkey parcellation");
 
             primate = siibra.getParcellation("mouse", "2017");
             testCase.verifyEqual(primate.Name, "Allen Mouse Common Coordinate Framework v3 2017");
